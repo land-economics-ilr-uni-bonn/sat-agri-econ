@@ -1,0 +1,216 @@
+---
+title: "2_raster_data_from_scratch"
+format: html
+editor: visual
+---
+
+
+
+# Load libraries
+
+Ctrl + Alt + I
+
+
+Ctrl + Shift + Enter
+
+```{r}
+install.packages(pacman)
+```
+
+
+```{r}
+library(pacman)
+```
+
+```{r}
+p_load(
+  terra,
+  leaflet,
+  tmap,
+  mapview,
+  tictoc,
+  tidyverse,
+  install = TRUE
+)
+```
+
+
+```{r}
+
+```
+
+
+# Import raster data
+
+```{r}
+getwd()
+
+list.files("data/raw/")
+```
+
+
+
+## Yield data
+
+```{r}
+in_dir <- "data/raw/spam2020V1r0_global_yield.geotiff/spam2020V1r0_global_yield"
+```
+
+```{r}
+# list.files(in_dir)
+```
+
+```{r}
+rst <- terra::rast(file.path(in_dir, "spam2020_v1r0_global_Y_RICE_A.tif"))
+```
+
+```{r}
+rst
+```
+
+
+```{r}
+plot(rst)
+```
+
+```{r}
+tiffs <- list.files("data/raw/spam2020V1r0_global_yield.geotiff/spam2020V1r0_global_yield/", "*.tif", full.names = TRUE)
+```
+
+
+```{r}
+rst_allCrops <- rast(tiffs)
+
+```
+
+
+```{r}
+rst_allCrops
+```
+```{r}
+rst_allCrops_subset <- rst_allCrops[[88:93]]
+```
+
+```{r}
+rst_allCrops_subset
+```
+```{r}
+tm_shape(rst_allCrops_subset) +
+  tm_raster(n = 7, style = "fisher")
+```
+
+```{r}
+mapview(as(rst_allCrops_subset, "Raster"))
+```
+
+# Temperature
+
+```{r}
+# C:/Users\Hadi\Documents\work\postdoc_bonn\teaching\satellite_data_agricultural_economics\codes\to_upload_ecampus\raster\data\raw\wc2.1_cruts4.06_10m_tmax_2020-2021
+
+
+temp_dir <- "C:/Users/Hadi/Documents/work/postdoc_bonn/teaching/satellite_data_agricultural_economics/codes/to_upload_ecampus/raster/data/raw/wc2.1_cruts4.06_10m_tmax_2020-2021"
+
+```
+
+
+
+```{r}
+list.files(temp_dir)
+```
+
+```{r}
+temp_rsts <- rast(list.files(temp_dir, "*.tif", full.names = T))
+```
+
+
+```{r}
+temp_rsts
+```
+```{r}
+names(temp_rsts)
+```
+
+
+```{r}
+jan <- temp_rsts$`wc2.1_10m_tmax_2021-01.tif`
+feb <- temp_rsts[["wc2.1_10m_tmax_2021-02.tif"]]
+```
+
+```{r}
+sum_res <- jan + feb
+```
+
+```{r}
+r <- c(jan, feb, sum_res)
+
+r
+```
+```{r}
+res(r)
+```
+```{r}
+crs(r, describe = T)
+```
+```{r}
+# 1 deg is approx. 111 km = 111000 meters
+0.1666667 * 111000
+```
+
+
+```{r}
+mapview(as(r, "Raster"), 
+        maxpixels = ncell(r),
+        legend = FALSE)
+```
+
+
+Mean temperature
+
+
+```{r}
+mean_temp <- mean(temp_rsts)
+```
+
+```{r}
+mean_temp
+```
+```{r}
+tm_shape(mean_temp) +
+  tm_raster(n = 5, style = "fisher")
+  
+```
+
+
+```{r}
+tic()
+temp_mean_v2 <- terra::app(temp_rsts, fun = mean, 
+                           na.rm = T,
+                           cores = 2)
+toc()
+```
+
+```{r}
+terra::writeRaster(temp_mean_v2, "data/processed/temp_mean_v2.tif")
+```
+
+
+
+```{r}
+temp_mean_v2
+```
+
+```{r}
+tm_shape(temp_mean_v2) +
+  tm_raster(n = 5, style = "fisher")
+ 
+```
+
+
+# Raster algebra
+
+```{r}
+
+```
+
+

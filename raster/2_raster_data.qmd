@@ -1,0 +1,628 @@
+---
+title: "2_raster_data"
+format: html
+editor: visual
+---
+
+# Import libraries
+
+```{r}
+library(pacman)
+```
+
+```{r}
+p_load(
+  terra,
+  leaflet,
+  tmap,
+  mapview,
+  tictoc,
+  tidyverse,
+  install = TRUE
+)
+```
+
+# Import raster data
+
+## Yield
+
+Source: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/SWPENT
+
+```{r}
+in_dir <- "data/raw/spam2020V1r0_global_yield.geotiff/spam2020V1r0_global_yield"
+```
+
+```{r}
+# list.files(in_dir)
+```
+
+```{r}
+rst <- terra::rast(file.path(in_dir, "spam2020_v1r0_global_Y_RICE_A.tif"))
+```
+
+```{r}
+rst
+```
+
+```{r}
+files <- list.files(in_dir, full.names = TRUE)
+
+files_A <- files[grepl("_A.tif", files)]
+```
+
+```{r}
+rst_allcrops <- rast(files_A)
+```
+
+```{r}
+rst_allcrops
+```
+
+## Temperature
+
+Source: https://www.worldclim.org/data/worldclim21.html
+
+```{r}
+in_dir_tmax_2020 <- "data/raw/wc2.1_cruts4.06_10m_tmax_2020-2021"
+```
+
+```{r}
+in_dir_tmax_1960 <- "data/raw/wc2.1_cruts4.06_10m_tmax_1960-1969"
+```
+
+```{r}
+list.files(in_dir_tmax_2020)
+```
+
+```{r}
+# list.files(in_dir_tmax_1960)
+```
+
+```{r}
+tmax_2020_rsts <- rast(list.files(in_dir_tmax_2020, "*.tif", full.names = TRUE))
+```
+
+```{r}
+tmax_2020_rsts
+```
+
+## Land cover map
+
+Source: https://data.ceda.ac.uk/neodc/esacci/land_cover/data/land_cover_maps/v2.0.7
+
+```{r}
+lc <- rast("data/raw/esa_cci_lc/ESACCI-LC-L4-LCCS-Map-300m-P1Y-2015-v2.0.7.tif")
+```
+
+```{r}
+lc
+```
+
+
+```{r}
+lc_small <- rast("data/raw/esa_cci_lc/ESACCI-LC-L4-LCCS-Map-300m-P1Y-2015-v2.0.7.tif",
+           win = ext(c(5.9, 15.0, 47.3, 55.1)))
+```
+
+```{r}
+lc_small
+```
+
+```{r}
+cci_lc_legend <- read_csv2("data/raw/esa_cci_lc/ESACCI-LC-Legend.csv")
+```
+
+
+
+
+```{r}
+# View(cci_lc_legend)
+```
+
+# Inspect raster data
+
+```{r}
+format(object.size(rst), units = "auto")
+```
+
+```{r}
+inMemory(rst) 
+```
+
+```{r}
+ncell(rst)
+```
+```{r}
+rst
+```
+
+```{r}
+res(rst)
+```
+
+```{r}
+xres(rst); yres(rst)
+```
+
+```{r}
+ext(rst)
+```
+
+```{r}
+nlyr(rst)
+```
+
+```{r}
+crs(rst, describe = TRUE, proj = TRUE)
+```
+
+```{r}
+# terra::describe(file.path(in_dir, "spam2020_v1r0_global_Y_RICE_A.tif"))
+```
+
+```{r}
+hist(rst, maxcell = ncell(rst), breaks = 100)
+```
+
+# Visualize raster data
+
+## Static mode
+
+```{r}
+plot(rst)
+```
+
+See `?terra::plot` for more visualization customization options.
+
+```{r}
+tmap_mode("plot")
+
+tmap::tm_shape(rst) +
+  tm_raster()
+```
+
+```{r}
+tmap::tm_shape(rst) +
+  tm_raster(n = 7, style = "fisher")
+```
+
+```{r}
+tic()
+tmap::tm_shape(tmax_2020_rsts) +
+  tm_raster(n = 7, style = "fisher")
+toc()
+```
+
+## Interactive mode
+
+```{r}
+## Copy and paste in console and run
+
+tmap_mode("view")
+
+tmap::tm_shape(rst, 
+               raster.downsample = FALSE
+               ) +
+  tm_raster(n = 7, style = "fisher") #+
+  #tm_basemap(leaflet::providers$Esri.WorldImagery)
+
+tmap_mode("plot")
+
+```
+
+```{r}
+## Copy and paste in console and run
+
+# mapview(rst,
+#         maxpixels  = ncell(rst)
+#         )
+```
+
+# Raster geoprocessing
+
+## Raster algebra (band math)
+
+```{r}
+rst1 <- rst_allcrops$spam2020_v1r0_global_Y_WHEA_A
+
+rst2 <- rst_allcrops[["spam2020_v1r0_global_Y_MAIZ_A"]]
+
+rst3 <- rst1 + rst2
+
+rst4 <- rst1 - rst2
+
+rsts <- c(rst1, rst2, rst3)
+
+```
+
+```{r}
+# mapview(as(rsts, "Raster"), maxpixels = ncell(rst1), legend = FALSE)
+```
+
+```{r}
+rst5  <- c(rst3, rst4)
+```
+
+```{r}
+rst5
+```
+
+```{r}
+rst5 * 10
+```
+
+### Example with NDVI
+
+```{r}
+system.file("tif/L7_ETMs.tif", package = "stars")
+```
+
+
+```{r}
+f <- system.file("tif/L7_ETMs.tif", package = "stars")
+landsat <- rast(f)
+landsat
+```
+
+```{r}
+red <- landsat[[3]]  ## landsat$L7_ETMs_3 or landsat[["L7_ETMs_3"]]
+nir <- landsat[[4]]
+ndvi1 <- (nir - red) / (nir + red)
+names(ndvi1) <- "ndvi1"
+```
+
+```{r}
+## copy paste run in console
+
+mapview(as(c(red, nir, ndvi1), "Raster"), 
+        maxpixels = ncell(ndvi1), 
+        legend = FALSE)
+```
+
+```{r}
+
+ndvi_func <- function(nir, red) {
+  (nir - red) / (nir + red)
+}
+
+
+ndvi2 <- terra::lapp(landsat[[c(4,3)]], fun = ndvi_func) ## cores, filename, wopt
+
+# writeRaster()
+
+plot(ndvi2)
+```
+
+## Local
+
+Per pixel, "drill through" across raster layers.
+
+```{r}
+tmax_2020_rsts
+```
+
+
+```{r}
+
+# tmax_2020_perPixelMean <- mean(tmax_2020_rsts)
+
+tmax_2020_perPixelMean <- terra::app(tmax_2020_rsts, fun = "mean")
+
+```
+
+
+```{r}
+tmax_2020_perPixelMean
+```
+```{r}
+tmap::tm_shape(tmax_2020_perPixelMean) +
+  tm_raster(n = 7, style = "fisher")
+```
+
+
+
+```{r}
+tmap::tm_shape(tmax_2020_perPixelMean, 
+               projection = "+proj=eqearth +wktext") +
+  tm_raster(n = 7, style = "fisher")
+```
+
+## Reclassify values
+
+```{r}
+tic()
+rcl1 <- ifel(tmax_2020_perPixelMean > 30, NA, tmax_2020_perPixelMean)
+toc()
+```
+
+```{r}
+tmap::tm_shape(rcl1, projection = "+proj=eqearth +wktext") +
+  tm_raster(n = 7, style = "fisher")
+```
+
+```{r}
+tic()
+rcl2 <- terra::app(tmax_2020_perPixelMean, fun = \(x) { x[x > 30] <- NA; x }, cores = 2)
+toc()
+```
+
+```{r}
+tmap::tm_shape(rcl2, projection = "+proj=eqearth +wktext") +
+  tm_raster(n = 7, style = "fisher")
+```
+
+```{r}
+hist(lc_small) 
+```
+```{r}
+rcl_mtrx <- cbind(
+  c(100,120, 200,250),
+  c(1,1, 2,2)
+  
+)
+```
+
+
+
+```{r}
+## reclassify
+# 
+# // Forest: 1
+# // Shrubland: 2
+# // Grassland: 3
+# // Cropland: 4
+
+# 50,60,61,62,70,71,72,80,81,82,90,100,160,170 -> 1
+# 120 -> 2
+# 110,130 -> 3
+# 10,11,12,20,30 -> 4
+
+reclass_matrix <- cbind(
+  c(50, 60, 61, 62, 70, 71, 72, 80, 81, 82, 90, 100, 160, 170, 120, 110, 130, 10, 11, 12, 20, 30),
+  c(rep(1, 14), 2, 3, 3, rep(4, 5))
+)
+
+lc_small_rcl <- terra::classify(lc_small, reclass_matrix, others = NA)
+
+```
+
+```{r}
+tmap::tm_shape(lc_small_rcl) +
+  tm_raster(palette = "cat", style = "cat")
+```
+
+```{r}
+lc_small_rcl_rst <- as(lc_small_rcl, "Raster") 
+```
+
+```{r}
+inMemory(lc_small_rcl_rst)
+```
+
+```{r}
+mapview(as.factor(lc_small_rcl_rst))
+```
+
+```{r}
+tic()
+lc_small_rcl_rst_foc <- terra::focal(rast(as.factor(lc_small_rcl_rst)), w = 3, fun = \(x) mode(x))
+toc()
+```
+
+```{r}
+mapview(as.factor(lc_small_rcl_rst_foc))
+```
+
+
+
+
+## Global
+
+Across a raster layer.
+
+```{r}
+tmax_2020_perPixelStats <- global(tmax_2020_perPixelMean, fun = c("mean", "sd"), na.rm = TRUE)
+```
+
+```{r}
+tmax_2020_perPixelStats
+```
+
+## Focal
+
+```{r}
+small_rst <- terra::crop(tmax_2020_perPixelMean, ext(lc_small))
+```
+
+```{r}
+small_rst_focal <- terra::focal(small_rst, w = 3, fun = "mean")
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(small_rst)
+plot(small_rst_focal)
+```
+
+## Resampling and reprojection
+
+```{r}
+
+yield_rst <- rst_allcrops$spam2020_v1r0_global_Y_WHEA_A
+
+tmax_rst <- tmax_2020_rsts[[1]]
+
+```
+
+```{r}
+## To show this doesn't work, because the rasters don't share the same grid (extent and resolution)
+
+not_run <- FALSE
+
+if (!not_run) {
+  yield_rst * tmax_rst
+}
+
+```
+
+```{r}
+## To show this doesn't work, because the rasters don't share the same grid (extent and resolution)
+
+not_run <- FALSE
+
+if (!not_run){
+  c(yield_rst, tmax_rst)
+}
+
+```
+
+```{r}
+yield_rst
+```
+
+
+```{r}
+res(yield_rst); res(tmax_rst)
+```
+
+```{r}
+
+# terra::resample() # Resample (warp) values to a SpatRaster with a different origin and/or resolution
+
+yield_rst_resampled <- terra::resample(yield_rst, tmax_rst, method = "average")
+
+```
+
+```{r}
+c(yield_rst_resampled, tmax_rst)
+```
+
+```{r}
+yield_rst_resampled / tmax_rst
+```
+
+## Zonal
+
+```{r}
+res(tmax_rst)
+```
+```{r}
+res(lc_small_rcl)
+```
+
+
+```{r}
+tic()
+tmax_rst_rsmpl <- terra::resample(tmax_rst, lc_small_rcl, method = "near")
+toc()
+```
+
+```{r}
+plot(tmax_rst_rsmpl)
+```
+
+```{r}
+plot(lc_small_rcl)
+```
+
+```{r}
+zonal_res <- terra::zonal(tmax_rst_rsmpl, lc_small_rcl, fun = "mean", na.rm = TRUE)
+```
+
+```{r}
+zonal_res
+```
+
+# Save raster
+
+```{r}
+writeRaster(yield_rst_resampled, filename = "data/processed/yield_rst_resampled.tif",
+            overwrite = TRUE)
+```
+
+```{r}
+writeRaster(x = tmax_2020_perPixelMean, filename = "data/processed/tmax_2020_perPixelMean.tif",
+            overwrite = TRUE)
+```
+
+More GDAL options.
+
+```{r}
+# writeRaster(x = tmax_2020_perPixelMean, filename = "data/processed/tmax_2020_perPixelMean.tif",
+#             gdal = c("COMPRESS=LZW"),   ## or "DEFLATE"
+#             datatype = "FLT8S",   ## Float64
+#             NAflag = 0, 
+#             overwrite = TRUE)
+```
+
+# Other topics
+
+## Other functions in {terra} package
+
+```{r}
+# sprc() # create a SpatRasterCollection from (a list of) SpatRasters. A SpatRasterCollection is a vector of SpatRaster objects. Unlike for a SpatRasterDataset, there the **extent and resolution of the SpatRasters do not need to match each other**.
+# 
+# sds() # # Create a SpatRasterDataset from a file with subdatasets (ncdf or hdf) or from SpatRasters. A SpatRasterDataset contains SpatRasters that represent sub-datasets for the same area. They all have the **same extent and resolution**.
+```
+
+```{r}
+# terra::merge() # Combine SpatRasters with different extents (but same origin and resolution)
+# 
+# terra::mosaic()
+```
+
+```{r}
+ls("package:terra")
+```
+
+## {stars} package for data cubes
+
+```{r}
+library(stars)
+temp <- st_as_stars(tmax_2020_rsts)
+```
+
+```{r}
+temp
+```
+
+```{r}
+temp 
+```
+
+```{r}
+start_date <- ymd("2021-01-01")
+
+end_date <- ymd("2021-12-31")
+
+dates <- seq(start_date, end_date, "months")
+```
+
+```{r}
+(
+  temp <-
+    st_set_dimensions(
+      temp,
+      3,
+      values = dates,
+      names = "date"
+    )
+)
+```
+
+```{r}
+temp |> filter(between(date, ymd("2021-01-01"), ymd("2021-12-31"))) |> 
+  plot()
+```
+
+## Raster data formats (drivers)
+
+```{r}
+st_drivers("raster")
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```

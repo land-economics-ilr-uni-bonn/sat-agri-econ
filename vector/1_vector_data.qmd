@@ -1,0 +1,541 @@
+---
+title: "1_vector_data"
+format: html
+editor: visual
+---
+
+# Import packages/libraries
+
+```{r}
+library(pacman)
+```
+
+```{r}
+pacman::p_load(
+  sf, 
+  tmap, 
+  mapview, 
+  rmapshaper, 
+  tictoc, 
+  countrycode, 
+  modelsummary, 
+  tidyverse, 
+  pacman, 
+  install = TRUE
+)
+```
+
+# Import data
+
+## Vector data
+
+Source: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/
+
+```{r}
+
+countries_sf <- st_read("data/raw/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp")
+
+# countries_sf <- read_sf("data/raw/ne_10m_admin_0_countries", "ne_10m_admin_0_countries")
+
+```
+
+```{r}
+# countries_sf
+```
+
+```{r}
+tic()
+
+# countries_sf <- st_make_valid(countries_sf)
+countries_sf <- rmapshaper::ms_simplify(countries_sf)
+
+toc()
+```
+
+```{r}
+# View(countries_sf)
+```
+
+```{r}
+format(object.size(countries_sf), units = "auto")
+```
+
+```{r}
+class(countries_sf)
+```
+
+```{r}
+dim(countries_sf)
+```
+
+```{r}
+names(countries_sf)
+```
+
+```{r}
+countries_df <- countries_sf |> st_drop_geometry()
+```
+
+```{r}
+countries_df |> head()
+```
+
+
+```{r}
+class(countries_df)
+```
+
+```{r}
+countries_df <- countries_df |> as_tibble()
+```
+
+```{r}
+class(countries_df)
+```
+
+## Table data
+
+Example with FAOSTAT data on crops and livestock products.
+
+Source: https://www.fao.org/faostat/en/#data/QCL
+
+```{r}
+production_df <- read_csv("data/raw/Production_Crops_Livestock_E_All_Data_(Normalized)/Production_Crops_Livestock_E_All_Data_(Normalized).csv")
+```
+
+```{r}
+# production_df
+production_df |> head()
+```
+
+## Table data with coordinates
+
+Source: https://www.science.org/doi/10.1126/science.aax0848 .
+
+```{r}
+points_df <- read_csv2("data/raw/aax0848_bastin_sm_data-file-s1.csv")
+```
+
+```{r}
+# points_df
+points_df |> head()
+```
+
+# Convert table (with geometry column) to vector object (sf)
+
+```{r}
+points_sf <- points_df |> 
+  st_as_sf(coords = c("location_x", "location_y"), crs = "EPSG:4326", remove = FALSE) # set coordinates and CRS
+```
+
+```{r}
+# points_sf
+points_sf |> head()
+```
+
+# Wrangle data
+
+
+```{r}
+countries_sf <- countries_sf |> mutate(
+  NE_ID = as.character(NE_ID),
+  POP_EST = as.double(POP_EST)
+)
+```
+
+
+```{r}
+asia_sf <- countries_sf |> 
+  filter(CONTINENT == "Asia") 
+```
+
+```{r}
+dim(asia_sf)
+```
+
+```{r}
+asia_sf_add <- asia_sf |> 
+  select(NAME, POP_EST, GDP_MD) |> 
+  mutate(new_var = GDP_MD  / POP_EST) 
+```
+
+```{r}
+asia_sf_add
+```
+
+# Visualize data
+
+## Static mode
+
+```{r}
+tm_shape(asia_sf_add) + 
+  tm_polygons() + 
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(asia_sf_add) + 
+  tm_polygons("new_var") + 
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tmap_obj <- tm_shape(countries_sf) + 
+  tm_polygons(col = "green") +   # col = "green"  # alpha = 0
+  tm_shape(points_sf) +
+  tm_symbols(size = 0.05, col = "red") 
+  tm_layout(frame = FALSE)
+  
+tmap_obj
+```
+
+## Interactive mode
+
+Best to be done in GIS software e.g. QGIS or ArcGIS. Which also allows to show many more different basemaps. See https://github.com/opengeos/qgis-basemaps .
+
+```{r}
+
+## Copy paste and run in console
+
+tmap_mode("view")
+
+# Create the interactive map
+tm_shape(points_sf |> filter(country == "Germany")) +
+  tm_dots(col = "treecover2015")
+
+tmap_mode("plot")
+
+
+```
+
+```{r}
+## Default basemaps include satellite imagery (Esri.WorldImagery)
+## Copy paste and run in console
+
+# mapview(points_sf |> filter(country == "Germany"),
+#         zcol = "treecover2015")
+
+```
+
+# Save plot
+
+```{r}
+tmap_save(tmap_obj, filename = "figures/my_vector_data_plot_1.png")
+```
+
+# Combine table and vector data
+
+```{r}
+# countries_sf  # the vector data, i.e., country boundaries polygon 
+```
+
+```{r}
+# names(countries_sf)
+```
+
+"ISO_A3" is the country code in the vector data.
+
+```{r}
+# production_df  # the table data, i.e., FAOSTAT crops and livestock products sheet
+production_df |> head()
+```
+
+"`Area Code (M49)`" is the country code in the table data. These are United Nations (UN) M49 numeric codes.
+
+```{r}
+# modelsummary::datasummary_skim(production_df)
+```
+
+The production variables in the FAOSTAT data.
+
+```{r}
+unique(production_df$Element)
+```
+
+The years in the FAOSTAT data.
+
+```{r}
+range(production_df$Year)
+```
+
+The crop (product) categories in the FAOSTAT data.
+
+```{r}
+# unique(production_df$Item)
+```
+
+For example, we get rice yield for 2022.
+
+```{r}
+production_df_filt1 <- production_df |> 
+  filter(Year == 2022) |> 
+  filter(Element == "Yield", Item == "Rice") 
+```
+
+We need to match, "ISO_A3" country code in the vector data, with, "`Area Code (M49)`" country code in the table data.
+
+Use {countrycode} package to create ISO3 code from the United Nations M49 numeric code.
+
+```{r}
+production_df_filt1 |> select(`Area Code (M49)`) |> head(2) |> pull()
+```
+
+```{r}
+as.numeric(sub("'", "", production_df_filt1 |> select(`Area Code (M49)`) |> head(2) |> pull()))
+```
+
+```{r}
+production_df_filt1 <- production_df_filt1 |> 
+  mutate(matched_iso3c = countrycode::countrycode(as.numeric(sub("'", "", `Area Code (M49)`)), origin = "un", destination = "iso3c"))  
+```
+
+Join the table data and vector data (destination).
+
+```{r}
+production_df_filt1_sf <- countries_sf |> left_join(production_df_filt1, by = c("ISO_A3" = "matched_iso3c"))
+```
+
+```{r}
+tm_shape(production_df_filt1_sf) + 
+  tm_polygons("Value") + 
+  tm_layout(frame = FALSE)
+```
+
+# Save vector data
+
+
+```{r}
+st_write(production_df_filt1_sf, "data/processed/yield_rice_2022.shp", append = FALSE)
+```
+
+```{r}
+st_write(production_df_filt1_sf, "data/processed/yield_rice_2022.gpkg", append = FALSE)
+```
+
+```{r}
+st_write(points_sf, "data/processed/points_sf.gpkg", append = FALSE)
+```
+
+
+
+```{r}
+st_write(countries_sf, "data/processed/countries_sf.gpkg", append = F)
+```
+
+
+# Vector geoprocessing/algorithm (examples of the commonly used ones)
+
+Example with 100 points.
+
+```{r}
+points_sf_smpl <- points_sf |> filter(country == "Germany") |> sample_n(100)
+```
+
+## Reprojection
+
+```{r}
+points_sf_smpl_3857 <- st_transform(points_sf_smpl, crs = 3857)
+```
+
+Note also `st_set_crs()` function.
+
+```{r}
+tm_shape(points_sf_smpl_3857) + 
+  tm_symbols(col = "blue") + 
+  tm_grid()
+```
+
+```{r}
+tm_shape(points_sf_smpl) + 
+  tm_symbols(col = "blue") + 
+  tm_grid()
+```
+
+```{r}
+st_is_longlat(points_sf_smpl)
+```
+
+```{r}
+st_is_longlat(points_sf_smpl_3857)
+```
+
+```{r}
+
+## just to show spatial join does not work, if the datasets have different CRS
+
+not_run <- TRUE
+
+if (!not_run) {
+  
+  st_join(points_sf_smpl_3857, countries_sf)
+
+}
+
+```
+
+```{r}
+# st_crs(points_sf_smpl_3857)
+
+terra::crs(points_sf_smpl_3857, describe = TRUE, proj = TRUE)
+
+```
+
+```{r}
+terra::crs(countries_sf, describe = TRUE, proj = TRUE)
+```
+
+```{r}
+points_sf_smpl_3857_toCountriesProj <- st_transform(points_sf_smpl_3857, crs = st_crs(countries_sf))
+```
+
+```{r}
+# just to show spatial join works, now that both datasets have the same CRS; 
+# spatial join will be explained in later section
+st_join(points_sf_smpl_3857_toCountriesProj, countries_sf) 
+```
+
+## Buffer
+
+```{r}
+tic()
+points_sf_smpl_3857_buff <- st_buffer(points_sf_smpl_3857, dist = 50000)  # buffer distance in meters
+toc()
+```
+
+```{r}
+tm_shape(points_sf_smpl_3857) + 
+  tm_dots(col = "blue") + 
+  tm_shape(points_sf_smpl_3857_buff) +
+  tm_borders(col = "red") +
+  tm_grid() +
+  # tm_graticules() +
+  tm_scale_bar()
+```
+
+## Overlay/spatial join
+
+```{r}
+points_sf_smpl_world <- points_sf |> sample_n(100)
+```
+
+```{r}
+tic()
+points_on_countries <- st_join(points_sf_smpl_world, countries_sf)
+toc()
+```
+
+```{r}
+# points_on_countries
+points_on_countries |> head()
+```
+
+```{r}
+
+## Copy paste and run in console
+
+tmap_mode("view")
+
+tm_shape(points_on_countries) + 
+  tm_dots(col = "NAME_EN", legend.show = FALSE) 
+
+tmap_mode("plot")
+
+```
+
+# Other topics
+
+## Vector data formats (drivers)
+
+```{r}
+st_drivers("vector")
+```
+
+## Crop
+
+```{r}
+bbox <- st_bbox(countries_sf |> filter(NAME_EN %in% c("Indonesia", "India")))
+bbox
+```
+
+```{r}
+countries_sf_cropped <- st_crop(countries_sf, bbox)
+```
+
+```{r}
+plot(st_geometry(countries_sf_cropped))
+```
+
+Draw in geojson.io .
+
+```{r}
+library(geojsonsf)
+```
+
+```{r}
+geojson_string <- '{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -19.940369290877726,
+              18.31302531933858
+            ],
+            [
+              -19.940369290877726,
+              1.853763406760521
+            ],
+            [
+              56.974670388415376,
+              1.853763406760521
+            ],
+            [
+              56.974670388415376,
+              18.31302531933858
+            ],
+            [
+              -19.940369290877726,
+              18.31302531933858
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}'
+```
+
+```{r}
+sf_object <- geojson_sf(geojson_string)
+```
+
+```{r}
+sf_object_cropped <- st_crop(countries_sf, sf_object)
+```
+
+```{r}
+plot(st_geometry(sf_object_cropped))
+```
+
+## All functions in {sf} package.
+
+```{r}
+ls("package:sf")
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
+
+```{r}
+
+```
+

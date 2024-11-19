@@ -1,0 +1,305 @@
+---
+title: "3_raster_vector_interaction"
+format: html
+editor: visual
+---
+
+# Load packages
+
+```{r}
+library(pacman)
+```
+
+```{r}
+p_load(
+  exactextractr,
+  sf,
+  terra,
+  leaflet,
+  tmap,
+  mapview,
+  tictoc,
+  tidyverse,
+  install = TRUE
+)
+```
+
+# Data
+
+## Raster data
+
+```{r}
+tmax <- rast("data/processed/tmax_2020_perPixelMean.tif")
+```
+
+```{r}
+yield <- rast("data/processed/yield_rst_resampled.tif")
+```
+
+## Vector data
+
+```{r}
+points_sf <- st_read("data/processed/points_sf.gpkg")
+```
+
+```{r}
+countries_sf <- st_read("data/processed/countries_sf.gpkg")
+```
+
+
+# Raster extraction to points
+
+```{r}
+points_sf_smpl <- points_sf |> sample_n(1000)
+```
+
+```{r}
+tm_shape(tmax) + 
+  tm_raster() + 
+  tm_shape(points_sf_smpl) + 
+  # tm_dots()
+  tm_symbols(col = "magenta", size = 0.1) 
+```
+
+```{r}
+
+tic()
+
+extr_points_tmax <- terra::extract(
+  x = tmax,
+  y = points_sf_smpl, 
+  method = "simple", # "simple" i.e. nearest neighbor; vs "bilinear" 
+  bind = TRUE
+)
+
+toc()
+
+```
+
+```{r}
+class(extr_points_tmax)
+```
+
+```{r}
+extr_points_tmax <- st_as_sf(extr_points_tmax)
+```
+
+```{r}
+class(extr_points_tmax)
+```
+
+```{r}
+class(vect(extr_points_tmax))
+```
+
+```{r}
+# View(extr_points_tmax)
+```
+
+```{r}
+extr_points_tmax
+```
+
+```{r}
+extr_points_tmax |> st_drop_geometry() |> as_tibble() |> 
+  ggplot(aes(x = mean, y = treecover2015)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  xlab("Mean temperature") +
+  theme_minimal()
+```
+
+# Raster extraction to polygons
+
+```{r}
+tm_shape(yield) +
+  tm_raster(n = 7, style = "fisher") +
+  tm_shape(countries_sf) +
+  tm_borders(col = "blue") +
+  tm_layout(frame = NA)
+```
+
+```{r}
+tic()
+
+extr_polygons_yield <- terra::extract(
+  x = yield,
+  y = countries_sf, 
+  fun = "mean", na.rm = TRUE,
+  weights = TRUE  
+  # exact = TRUE
+  # bind = TRUE
+)
+
+toc()
+```
+
+```{r}
+class(extr_polygons_yield)
+```
+
+```{r}
+extr_polygons_yield
+```
+
+```{r}
+# countries_sf$yield <- extr_polygons_yield$spam2020_v1r0_global_Y_WHEA_A
+
+countries_sf <- countries_sf |> mutate(yield = extr_polygons_yield |> pull(spam2020_v1r0_global_Y_WHEA_A))
+```
+
+```{r}
+tm_shape(countries_sf) +
+  tm_polygons("yield") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+# ggplot(data = countries_sf) +
+#   geom_sf(aes(fill = yield)) +
+#   scale_fill_viridis_c() +
+#   theme_minimal()
+```
+
+```{r}
+
+tic()
+
+extr_polygons_yield_withExactextract <- exactextractr::exact_extract(
+  yield,
+  countries_sf,
+  fun = "mean" # change according to what's appropriate e.g. "count", "sum", "mean", "mode" etc., see function's help; note, can also do several funs at once e.g. c('mean', 'weighted_mean')
+)
+
+toc()
+```
+
+```{r}
+class(extr_polygons_yield_withExactextract)
+```
+
+```{r}
+# extr_polygons_yield_withExactextract
+```
+
+```{r}
+countries_sf <- countries_sf |> mutate(yield = extr_polygons_yield_withExactextract)
+```
+
+```{r}
+
+tic()
+
+extr_polygons_yield_withExactextract_add <- exactextractr::exact_extract(
+  yield,
+  countries_sf,
+  weights = 'area',  # instructs exact_extract to compute its own cell areas
+  fun = c('mean', 'weighted_mean'), # change according to what's appropriate e.g. "count", "sum", "mean", "mode" etc., see function's help; note, can also do several funs at once e.g. c('mean', 'weighted_mean')
+  force_df = TRUE,
+  append_cols = colnames(countries_sf),
+  full_colnames = TRUE
+)
+
+toc()
+```
+
+```{r}
+class(extr_polygons_yield_withExactextract_add)
+```
+
+# Cropping raster with polygon
+
+```{r}
+germany_sf <- countries_sf |> filter(NAME == "Germany")
+```
+
+```{r}
+germany_vec <- vect(germany_sf)
+```
+
+```{r}
+cropped1 <- terra::crop(tmax, germany_vec)
+
+cropped2 <- terra::crop(tmax, germany_vec, mask = T)
+```
+
+```{r}
+tm_shape(cropped1) + 
+  tm_raster(palette = "seq") + 
+  tm_shape(germany_sf) + 
+  tm_borders() + 
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(cropped2) + 
+  tm_raster() + 
+  tm_shape(germany_sf) + 
+  tm_borders() + 
+  tm_layout(frame = FALSE)
+```
+
+# Reclassify values
+
+```{r}
+temp_tmap_func <- function(input_raster){
+
+  tm_obj <- tm_shape(input_raster) + 
+    tm_raster() + 
+    tm_shape(germany_sf) + 
+    tm_borders() + 
+    tm_layout(frame = FALSE)
+  
+  return(tm_obj)
+}
+```
+
+```{r}
+rr1 <- cropped2
+rr1[rr1 > 14] <- NA
+temp_tmap_func(rr1)
+```
+
+```{r}
+rr2 <- ifel(cropped2 > 14, NA, cropped2)
+temp_tmap_func(rr2)
+```
+
+```{r}
+reclass <- rbind(c(14, Inf, NA))
+rr3 <- classify(cropped2, reclass)
+temp_tmap_func(rr3)
+```
+
+```{r}
+rr4 <- terra::app(cropped2, fun = \(x) { x[x > 14] = NA; x }, cores = 2)
+temp_tmap_func(rr4)
+```
+
+# Whole raster to table (points)
+
+```{r}
+tic()
+cropped_df <- raster::rasterToPoints(as(cropped2, "Raster"))
+toc()
+```
+
+```{r}
+cropped_df <- as_tibble(cropped_df)
+```
+
+```{r}
+cropped_df
+```
+
+```{r}
+cropped_sf <- st_as_sf(cropped_df, coords = c("x", "y"), crs = 4326, remove = F)
+```
+
+```{r}
+tm_shape(cropped2) + 
+  tm_raster() + 
+  tm_shape(cropped_sf) + 
+  tm_dots(col = "blue") + 
+  tm_layout(frame = FALSE)
+```
