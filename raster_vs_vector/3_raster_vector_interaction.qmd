@@ -46,7 +46,6 @@ points_sf <- st_read("data/processed/points_sf.gpkg")
 countries_sf <- st_read("data/processed/countries_sf.gpkg")
 ```
 
-
 # Raster extraction to points
 
 ```{r}
