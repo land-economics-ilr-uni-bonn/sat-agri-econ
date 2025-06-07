@@ -1,0 +1,439 @@
+---
+title: "**Mapping tea plantations at the foot of Mount Kenya**"
+subtitle: |
+  **Supervised Machine Learning**
+
+  _[Land Economics Group, University of Bonn, Bonn, Germany](https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics)_
+author: "David Wuepper, Lisa Biber-Freudenberger, Hadi, Wyclife Agumba Oluoch"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+format: 
+  html:
+    toc: true
+    toc-location: left
+    toc-title: "Contents"
+    code-fold: true
+    number-sections: true
+editor: visual
+backgroundcolor: white
+bibliography: references.bib
+---
+
+## **Background**
+
+Tea (*Camellia sinensis* (L.) Kuntze) is a major cash crop and key driver of livelihoods in many parts of central highlands of Kenya with favorable altitude, rainfall, and soil conditions. Accurate monitoring of tea plantations is important for supporting agricultural planning, optimizing resource allocation like fertilizer, and monitoring land use change such as encroachment into protected areas. Traditional field surveys, though accurate, are often time-consuming and resource intensive, making remote sensing approaches increasingly valuable.
+
+In this tutorial, we demonstrate how to map tea plantations in a small region at the foot of Mount Kenya by combining Sentinel-2 satellite imagery, true presence and absence field data, and random forest machine learning techniques implemented in **R** [@rcoreteam2023]. We focus on workflow that spans from data preparation and model training to prediction and visualization of binary maps.
+
+::: callout-note
+While the case study is centered on tea mapping, the general approach can be adapted to map other crops or land cover types in different regions.
+:::
+
+Inside the data folder we have the following files that are projected to epsg code 3857:
+
+<ol type="i">
+
+<li>**roi_p.gpkg**: This is the region of interest (roi) geopackage for the tea plantations in Kenya.</li>
+
+<li>**s2_large.tif**: The is the Sentinel-2 image for the region of interest.</li>
+
+<li>**vect.gpkg**: This is the polygons of tea and non-tea areas for model training.</li>
+
+<li>**eval.gpkg**: This is observed 200 points consisting of 100 true tea and 100 non tea for testing the model performance.</li>
+
+</ol>
+
+## **Training data: tea and no tea points**
+
+In QGIS, we identified a small area at the foot of Mount Kenya and manually digitized tea plantation and non-tea areas. These were to be used for extracting the Sentinel-2 data for training the model.
+
+### **Loading Training Data in R**
+
+We begin by loading the boundary data using the `vect` function in `terra` package [@terra] version `r packageVersion("terra")`, which offers a convenient way to read a lot of geospatial data into `R`. There are several other options or packages one can use to read geospatial data into `R` such as `sf` package [@sf]. We also include `tidyterra` package [@tidyterra] version `r packageVersion("tidyterra")` for plotting in conjunction with assorted `tidyverse` package `r packageVersion("tidyverse")` functionalities in the background. The extent of the study area is shown in @fig-extent.
+
+```{r}
+#| label: fig-extent
+#| fig-cap: "Study area extent"
+#| message: false
+
+library(terra)      # version 1.8.54
+library(tidyterra)  # version 0.7.2
+library(tidyverse)  # version 2.0.0
+
+study_area <- vect(x = "data/roi_p.gpkg")
+
+ggplot() +
+  geom_spatvector(data = study_area, 
+                  fill = NA, 
+                  col = "blue")
+```
+
+The above code snippet loads and visualizes the study area boundary. However, we have only digitized a small portion of it for our training data. So, below, we add the roi to the map, see @fig-roi.
+
+```{r}
+#| label: fig-roi
+#| fig-cap: "Study area (red) border and small portion used for training (blue) border" 
+
+roi <- vect(x = "data/vect.gpkg")
+ggplot() +
+  geom_spatvector(data = study_area, 
+                  fill = NA, 
+                  col = "red") +
+  geom_spatvector(data = roi, 
+                  fill = NA, 
+                  col = "blue")
+```
+
+Now, let us turn our attention to the roi. It has `r nrow(roi)` polygons. Polygons 1:28 are tea fields and 29 is non-tea field. We can visualize them separately, @fig-sampling_areas.
+
+```{r}
+#| label: fig-sampling_areas
+#| fig-cap: "Region of interest where all tea plantations were digitized (green) and non tea areas (orange) used for model training"
+
+ggplot() +
+  geom_spatvector(data = roi,
+                  aes(fill = as.factor(tea_no_tea)),  # map tea_no_tea to fill
+                  color = "black") +                  # border color
+  scale_fill_manual(
+    values = c("0" = "orange", "1" = "green"),
+    name = "Legend"
+  ) +
+  theme_minimal()
+```
+
+It is then time to obtain the training data from the satellite image. We will use the `extract` function from `terra` package to extract the values of the pixels in the polygons.
+
+```{r}
+#| message: false
+
+s2 <- rast("data/s2_large.tif")
+tea_extract <- terra::extract(x = s2, y = roi)
+head(tea_extract)
+```
+
+### **Visualize RGB of the s2 for Study Area**
+
+The next step is to make a true color composite map from Sentinel-2 images within the study area showing the study extent and region of interest (where training points will be obtained from) @fig-study-area.
+
+```{r}
+#| fig-cap: "Study area (red) on background RGB image of Sentinel-2. Training area is shown in blue borders"
+#| label: fig-study-area
+
+plotRGB(x = s2, r = 3, g = 2, b = 1, stretch = "lin")
+plot(study_area, add = T, lwd = 4, border = 'red')
+plot(roi, add = T, fill = FALSE, border = 'blue', lwd = 2)
+```
+
+Since we know the that polygons 1 to 28 are tea plantations and 29th is non-tea field, we can subset the data to have tea and non-tea extracted values.
+
+```{r}
+tea_df <- tea_extract[tea_extract$ID != 29, ]
+no_tea_df <- tea_extract[tea_extract$ID == 29, ]
+```
+
+Great, now we have `{r} nrow(tea_df)` tea records and `{r} nrow(no_tea_df)` non-tea records. We can combine them into one data frame. But before that, we add column called *tea* which will contain a value of 1 for tea and 0 for non-tea. We then bind them and drop the ID column as follows.
+
+```{r}
+tea_df$tea <- 1
+no_tea_df$tea <- 0
+
+tea_no_tea_df <- rbind(tea_df, no_tea_df)
+
+tea_no_tea_df$ID <- NULL
+
+head(tea_no_tea_df)
+
+```
+
+## **Build the sdmData object and model**
+
+In this next step, we will build the machine learning model which will be able to take the current tea and no tea points and predictor variables to calibrate a model that can predict where else the crop could be within the study area. For that, we will use `sdm` package [@sdm] version `r packageVersion("sdm")`. There are several other packages that can achieve this, such as `caret` [@kuhn2008], `mlr3` [@mlr3], `tidymodels` [@tidymodels] among others. I prefer `sdm` because of it's simplicity, extensibile, and ease of use.
+
+```{r}
+library(sdm)
+sdm_data <- sdmData(formula = tea ~., 
+                    train = tea_no_tea_df)
+```
+
+Have a glance at the sdm_data object:
+
+```{r}
+sdm_data
+```
+
+Then the model calibration stage comes with sdm function from `sdm` package itself:
+
+```{r eval=FALSE}
+#| cache: true
+tea_model <- sdm(formula = tea ~.,
+                 data = sdm_data, 
+                 methods = "rf",
+                 replications = "boot",
+                 test.p = 30,
+                 n = 5,
+                 parallelSettings = list(ncores = 10,
+                                         method = "parallel"))
+write.sdm(tea_model, "model/tea_model.sdm")
+```
+
+View the model summary:
+
+```{r}
+tea_model <- read.sdm("model/tea_model.sdm")
+tea_model
+```
+
+Other checks on the model include looking at the response curves @fig-response_curve.
+
+```{r}
+#| label: fig-response_curve
+#| fig-cap: "Response curve of all the predictor variables used to build the tea_model"
+
+rcurve(tea_model)
+```
+
+We can also check for the area under the receiver operating characteristic curve (AUC), @fig-roc.
+
+```{r}
+#| label: fig-roc
+#| fig-cap: "Area under the receiver operating characteristic curve of the tea_model"
+
+roc(tea_model)
+```
+
+Visualizing how each of the predictor variables used in the model was important for the crop under mapping is also useful @fig-var_imp.
+
+```{r}
+#| label: fig-var_imp
+#| fig-cap: "Plot of the variable importance indicating which variables were most important in predicting the tea plantations"
+
+plot(getVarImp(tea_model))
+```
+
+::: callout-important
+One can redo what we have done up to here several times, tuning the modeling process until a model with desirable characteristics is attained. Basically, this is a model that meets the specific needs of the project. For example, one can change the number of replications (20 etc), replication methods (sub, cv), model methods (brt, gam, glm, rf, svm). One can also add occurrence records (e.g. from tea factories), one can also add predictor variables (soil, elevation).
+:::
+
+## **Assess Area of Applicability**
+
+It is important to assess the area of applicability of the model. This helps us to know how far we can use the model to make predictions. We can do this by using the `aoa` function from the `sdm` package.
+
+```{r}
+#| label: fig-aoa
+#| fig-cap: "Area of Applicability of the tea_model"
+#| message: false
+
+tea_aoa <- sdm::aoa(x = s2, d = tea_model)
+plot(tea_aoa)
+```
+
+Values close to 1 in @fig-aoa indicate areas that are similar to the training data. We notice that we can use our model to make predictions in most parts of the study area with minimal caution to the northeastern end,
+
+## **Predict tea plantations throughout the study area**
+
+Finally, we get to the point where we use the trained model to predict the tea plantations over the study area. For this, we use *predict* function.
+
+```{r}
+pred <- predict(object = tea_model, s2)
+pred
+```
+
+This is giving us five layers of `spatRaster` corresponding to the five runs of the model.
+
+We can visualize them, see
+
+```{r}
+#| label: fig-likelihood
+#| fig-cap: "Predicted likelihood of pixels being tea"
+ggplot() +
+  geom_spatraster(data = pred) +
+  facet_wrap(~lyr, ncol = 3) +
+  scale_fill_whitebox_c(
+    palette = "pi_y_g", 
+    n.breaks = 10,
+    guide = guide_legend(reverse = TRUE)
+  ) +
+  labs(
+    fill = ""
+  )
+```
+
+Normally, we take the median of the predictions since we only have one method 'maxent'. When more than one method, we may be careful to only get median of each method separately @fig-median-likelihood.
+
+```{r}
+#| label: fig-median-likelihood
+#| fig-cap: "Predicted median likelihood of pixels being tea"
+
+pred_median <- median(pred)
+ggplot() +
+  geom_spatraster(data = pred_median) +
+  scale_fill_whitebox_c(
+    palette = "pi_y_g", 
+    n.breaks = 10,
+    guide = guide_legend(reverse = TRUE)
+  ) +
+  labs(
+    fill = ""
+  )
+```
+
+It is also useful to quantify the uncertainty across the models run. This we can give using standard deviation metric or variance, among others @fig-stdev-likelihood.
+
+```{r}
+#| label: fig-stdev-likelihood
+#| fig-cap: "Uncertainty around predicted likelihood of pixels being tea"
+
+pred_uncertainty <- stdev(pred)
+ggplot() +
+  geom_spatraster(data = pred_uncertainty) +
+  scale_fill_whitebox_c(
+    palette = "gn_yl", 
+    n.breaks = 10,
+    guide = guide_legend(reverse = TRUE)
+  ) +
+  labs(
+    fill = ""
+  )
+```
+
+### **Binarize the likelihood map for tea-no_tea map**
+
+We now need to make an important step which is to binarize the map into tea-no_tea map. This is a map which we can therefore use to tell how much land is under tea. However, since we actually have not been in the field to make the observation of the fields, we use threshold based evaluation metrics to create a cut-off point along the 0 to 1 likelihood scale. To get the binary map, we are going to use `pa` function as follows:
+
+```{r}
+
+tea_no_tea_map <- pa(x = pred_median,
+                     y = tea_model, 
+                     id = 'ensemble', 
+                     opt = 2)
+
+```
+
+Now, with this map we can show the potential tea map of the study area @fig-tea_no_tea.
+
+```{r}
+#| label: fig-tea_no_tea
+#| fig-cap: "Predicted tea plantations and background"
+ggplot() +
+  geom_spatraster(data = as.factor(tea_no_tea_map)) +
+  scale_fill_manual(
+    values = c("0" = "pink", "1" = "darkgreen"), # Map levels to colors
+    labels = c("No tea", "Tea"),
+    guide = guide_legend(reverse = TRUE),
+    na.translate = FALSE# Reverse legend order
+  ) +
+  labs(
+    fill = ""
+  )
+```
+
+## **Testing the model on independent data**
+
+We can now test the model on independent data. We have a geopackage file called `eval.gpkg` which contains 200 points of tea and non-tea. We can visualize these @fig-interactive, and test the model.
+
+```{r}
+#| label: fig-interactive
+#| fig-cap: "Interactive map of tea map and test data points"
+#| message: false
+library(mapview)
+
+test_data <- vect("data/eval.gpkg")
+
+e1 <- extract(pred_median, test_data)
+e2 <- extract(tea_no_tea_map, test_data)
+
+eval1 <- evaluates(x = test_data$tea_no_tea,
+                   p = e1$median)
+eval2 <- evaluates(x = test_data$tea_no_tea,
+                   p = e2$median)
+
+eval1@threshold_based
+eval1@statistics
+
+mapview(tea_no_tea_map) +
+  mapview(test_data)
+
+```
+
+## Area under tea
+
+To find the area under tea within the predicted area. We can use `expanse` function from `terra` package.
+
+```{r}
+expanse(x = tea_no_tea_map, unit = "ha", byValue = TRUE)
+```
+
+We can go ahead and visualize the area under each class; tea and no tea @fig-tea_area.
+
+```{r}
+#| label: fig-tea_area
+#| fig-cap: "Tea versus Background Areas"
+
+tea_no_tea_map_f <- as.factor(tea_no_tea_map)
+levels(tea_no_tea_map_f) <- data.frame(value = c(0, 1),label = c("No tea", "Tea"))
+
+df_area <- expanse(tea_no_tea_map_f, 
+                   unit = 'ha', 
+                   byValue = TRUE)
+df_area |> 
+  ggplot(aes(x = reorder(value, -area), y = area, fill = value)) +
+  geom_col() +
+  geom_text(aes(label = round(area, 2)),
+            vjust = -0.3,
+            colour = 'black',
+            size = 5,
+            fontface = 'bold') +
+  theme_minimal() +
+  theme(
+    legend.position = 'none',
+    axis.text = element_text(
+      color = 'black',
+      face = 'bold',
+      size = 12
+    ),
+    axis.title = element_text(
+      color = 'black',
+      face = 'bold',
+      size = 14
+    ),
+    plot.title = element_text(
+      color = 'black',
+      face = 'bold',
+      size = 16,
+      hjust = 0.5
+    )
+  ) +
+  labs(x = "Land cover",
+       y = "Area (ha)") +
+  scale_fill_manual(
+    name = "Class",
+    values = c(
+    "No tea" = "orange",
+    "Tea" = "darkgreen"
+  ))
+```
+
+## **Application of the model and map**
+
+Manual monitoring of tea plantations is costly and limited in scale. Using machine learning models and high resolution satellite images, we can automate and enhance the monitoring process, with applications including:
+
+-   **Pest and disease detection**: Early identification for timely detection.
+-   **Drought monitoring**: Could help detect water stress for irrigation planning.
+-   **Yield estimation**: Predicting yield based on spectral data and plant health.
+-   **Damage assessment**: Identifying hail and other weather related impacts.
+-   **Encroachment detection**: Monitoring illegal expansion of plantations into protected areas.
+-   **Carbon quantification**: This can make it possible to efficiently quantify carbon in tea plantations.
+-   **Tacking tea shift**: Monitoring shifts in tea cultivation due to climate change and other reasons over time.
+
+## **Conclusion: Key Observations from the workflow**
+
+The map of tea *Camellia sinensis* achieved superb accuracy in central Kenya region. We are therefore quite confident in our model output. We could finally send the map to stakeholders in the tea industry hailing from the region to help validate its accuracy. In national scale mapping event, we would encounter a lot of challenges including agro-forestry, pruning of tea, variations in cultivars among others.
+
+## **Exercise: Use the tea_model to predict tea elsewhere or at different time**
+
+Since we have built our model, we can use it to make predictions across space and time. For instance, we can use the model to make prediction in another country, say Uganda. We can also use the same model to make predictions into the past, say 2020.
+
+**Feel free to reach us out if you got any questions** [Land Economics Group](https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics).
+
+## References

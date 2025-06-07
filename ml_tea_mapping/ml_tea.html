@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="David Wuepper, Lisa Biber-Freudenberger, Hadi, Wyclife Agumba Oluoch">
+<meta name="dcterms.date" content="2025-06-03">
+
+<title>Mapping tea plantations at the foot of Mount Kenya</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="ml_tea_files/libs/clipboard/clipboard.min.js"></script>
+<script src="ml_tea_files/libs/quarto-html/quarto.js"></script>
+<script src="ml_tea_files/libs/quarto-html/popper.min.js"></script>
+<script src="ml_tea_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="ml_tea_files/libs/quarto-html/anchor.min.js"></script>
+<link href="ml_tea_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="ml_tea_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="ml_tea_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="ml_tea_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="ml_tea_files/libs/bootstrap/bootstrap-ed00d775e8edb27f62eb45736af9a052.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="ml_tea_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="ml_tea_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="ml_tea_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+<link href="ml_tea_files/libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+
+<script src="ml_tea_files/libs/leaflet-1.3.1/leaflet.js"></script>
+
+<link href="ml_tea_files/libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+
+<script src="ml_tea_files/libs/proj4-2.6.2/proj4.min.js"></script>
+
+<script src="ml_tea_files/libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+
+<link href="ml_tea_files/libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+
+<script src="ml_tea_files/libs/leaflet-binding-2.2.2/leaflet.js"></script>
+
+<script src="ml_tea_files/libs/leaflet-providers-2.0.0/leaflet-providers_2.0.0.js"></script>
+
+<script src="ml_tea_files/libs/leaflet-providers-plugin-2.2.2/leaflet-providers-plugin.js"></script>
+
+<script src="ml_tea_files/libs/tea_no_tea_map - 1_5d270f-1/data_stars_tea_no_tea_map1e916a5.txt"></script>
+
+<script src="ml_tea_files/libs/joda-0.0.1/joda.js"></script>
+
+<script src="ml_tea_files/libs/joda-0.0.1/addImageQuery-bindings.js"></script>
+
+<script src="ml_tea_files/libs/clipboard-0.0.1/setClipboardText.js"></script>
+
+<script src="ml_tea_files/libs/HomeButton-0.0.1/home-button.js"></script>
+
+<script src="ml_tea_files/libs/HomeButton-0.0.1/easy-button-src.min.js"></script>
+
+<link href="ml_tea_files/libs/tea_no_tea_map - 1-CSS-0.0.1/tea_no_tea_map - 1_home-button.css" rel="stylesheet">
+
+<link href="ml_tea_files/libs/mapviewCSS-0.0.1/mapview-popup.css" rel="stylesheet">
+
+<link href="ml_tea_files/libs/mapviewCSS-0.0.1/mapview.css" rel="stylesheet">
+
+<link href="ml_tea_files/libs/test_data-CSS-0.0.1/test_data_home-button.css" rel="stylesheet">
+
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">1</span> <strong>Background</strong></a></li>
+  <li><a href="#training-data-tea-and-no-tea-points" id="toc-training-data-tea-and-no-tea-points" class="nav-link" data-scroll-target="#training-data-tea-and-no-tea-points"><span class="header-section-number">2</span> <strong>Training data: tea and no tea points</strong></a>
+  <ul class="collapse">
+  <li><a href="#loading-training-data-in-r" id="toc-loading-training-data-in-r" class="nav-link" data-scroll-target="#loading-training-data-in-r"><span class="header-section-number">2.1</span> <strong>Loading Training Data in R</strong></a></li>
+  <li><a href="#visualize-rgb-of-the-s2-for-study-area" id="toc-visualize-rgb-of-the-s2-for-study-area" class="nav-link" data-scroll-target="#visualize-rgb-of-the-s2-for-study-area"><span class="header-section-number">2.2</span> <strong>Visualize RGB of the s2 for Study Area</strong></a></li>
+  </ul></li>
+  <li><a href="#build-the-sdmdata-object-and-model" id="toc-build-the-sdmdata-object-and-model" class="nav-link" data-scroll-target="#build-the-sdmdata-object-and-model"><span class="header-section-number">3</span> <strong>Build the sdmData object and model</strong></a></li>
+  <li><a href="#assess-area-of-applicability" id="toc-assess-area-of-applicability" class="nav-link" data-scroll-target="#assess-area-of-applicability"><span class="header-section-number">4</span> <strong>Assess Area of Applicability</strong></a></li>
+  <li><a href="#predict-tea-plantations-throughout-the-study-area" id="toc-predict-tea-plantations-throughout-the-study-area" class="nav-link" data-scroll-target="#predict-tea-plantations-throughout-the-study-area"><span class="header-section-number">5</span> <strong>Predict tea plantations throughout the study area</strong></a>
+  <ul class="collapse">
+  <li><a href="#binarize-the-likelihood-map-for-tea-no_tea-map" id="toc-binarize-the-likelihood-map-for-tea-no_tea-map" class="nav-link" data-scroll-target="#binarize-the-likelihood-map-for-tea-no_tea-map"><span class="header-section-number">5.1</span> <strong>Binarize the likelihood map for tea-no_tea map</strong></a></li>
+  </ul></li>
+  <li><a href="#testing-the-model-on-independent-data" id="toc-testing-the-model-on-independent-data" class="nav-link" data-scroll-target="#testing-the-model-on-independent-data"><span class="header-section-number">6</span> <strong>Testing the model on independent data</strong></a></li>
+  <li><a href="#area-under-tea" id="toc-area-under-tea" class="nav-link" data-scroll-target="#area-under-tea"><span class="header-section-number">7</span> Area under tea</a></li>
+  <li><a href="#application-of-the-model-and-map" id="toc-application-of-the-model-and-map" class="nav-link" data-scroll-target="#application-of-the-model-and-map"><span class="header-section-number">8</span> <strong>Application of the model and map</strong></a></li>
+  <li><a href="#conclusion-key-observations-from-the-workflow" id="toc-conclusion-key-observations-from-the-workflow" class="nav-link" data-scroll-target="#conclusion-key-observations-from-the-workflow"><span class="header-section-number">9</span> <strong>Conclusion: Key Observations from the workflow</strong></a></li>
+  <li><a href="#exercise-use-the-tea_model-to-predict-tea-elsewhere-or-at-different-time" id="toc-exercise-use-the-tea_model-to-predict-tea-elsewhere-or-at-different-time" class="nav-link" data-scroll-target="#exercise-use-the-tea_model-to-predict-tea-elsewhere-or-at-different-time"><span class="header-section-number">10</span> <strong>Exercise: Use the tea_model to predict tea elsewhere or at different time</strong></a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">11</span> References</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><strong>Mapping tea plantations at the foot of Mount Kenya</strong></h1>
+<p class="subtitle lead"></p><p><strong>Supervised Machine Learning</strong></p>
+<p><em><a href="https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics">Land Economics Group, University of Bonn, Bonn, Germany</a></em></p><p></p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>David Wuepper, Lisa Biber-Freudenberger, Hadi, Wyclife Agumba Oluoch </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 3, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="background" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="background"><span class="header-section-number">1</span> <strong>Background</strong></h2>
+<p>Tea (<em>Camellia sinensis</em> (L.) Kuntze) is a major cash crop and key driver of livelihoods in many parts of central highlands of Kenya with favorable altitude, rainfall, and soil conditions. Accurate monitoring of tea plantations is important for supporting agricultural planning, optimizing resource allocation like fertilizer, and monitoring land use change such as encroachment into protected areas. Traditional field surveys, though accurate, are often time-consuming and resource intensive, making remote sensing approaches increasingly valuable.</p>
+<p>In this tutorial, we demonstrate how to map tea plantations in a small region at the foot of Mount Kenya by combining Sentinel-2 satellite imagery, true presence and absence field data, and random forest machine learning techniques implemented in <strong>R</strong> <span class="citation" data-cites="rcoreteam2023">(<a href="#ref-rcoreteam2023" role="doc-biblioref">R Core Team 2023</a>)</span>. We focus on workflow that spans from data preparation and model training to prediction and visualization of binary maps.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While the case study is centered on tea mapping, the general approach can be adapted to map other crops or land cover types in different regions.</p>
+</div>
+</div>
+<p>Inside the data folder we have the following files that are projected to epsg code 3857:</p>
+<ol type="i">
+<li>
+<strong>roi_p.gpkg</strong>: This is the region of interest (roi) geopackage for the tea plantations in Kenya.
+</li>
+<li>
+<strong>s2_large.tif</strong>: The is the Sentinel-2 image for the region of interest.
+</li>
+<li>
+<strong>vect.gpkg</strong>: This is the polygons of tea and non-tea areas for model training.
+</li>
+<li>
+<strong>eval.gpkg</strong>: This is observed 200 points consisting of 100 true tea and 100 non tea for testing the model performance.
+</li>
+</ol>
+</section>
+<section id="training-data-tea-and-no-tea-points" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="training-data-tea-and-no-tea-points"><span class="header-section-number">2</span> <strong>Training data: tea and no tea points</strong></h2>
+<p>In QGIS, we identified a small area at the foot of Mount Kenya and manually digitized tea plantation and non-tea areas. These were to be used for extracting the Sentinel-2 data for training the model.</p>
+<section id="loading-training-data-in-r" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="loading-training-data-in-r"><span class="header-section-number">2.1</span> <strong>Loading Training Data in R</strong></h3>
+<p>We begin by loading the boundary data using the <code>vect</code> function in <code>terra</code> package <span class="citation" data-cites="terra">(<a href="#ref-terra" role="doc-biblioref">Hijmans 2025</a>)</span> version 1.8.54, which offers a convenient way to read a lot of geospatial data into <code>R</code>. There are several other options or packages one can use to read geospatial data into <code>R</code> such as <code>sf</code> package <span class="citation" data-cites="sf">(<a href="#ref-sf" role="doc-biblioref">Pebesma and Bivand 2023</a>)</span>. We also include <code>tidyterra</code> package <span class="citation" data-cites="tidyterra">(<a href="#ref-tidyterra" role="doc-biblioref">Hernangómez 2023</a>)</span> version 0.7.2 for plotting in conjunction with assorted <code>tidyverse</code> package 2.0.0 functionalities in the background. The extent of the study area is shown in <a href="#fig-extent" class="quarto-xref">Figure&nbsp;1</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(terra)      <span class="co"># version 1.8.54</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyterra)  <span class="co"># version 0.7.2</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)  <span class="co"># version 2.0.0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>study_area <span class="ot">&lt;-</span> <span class="fu">vect</span>(<span class="at">x =</span> <span class="st">"data/roi_p.gpkg"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatvector</span>(<span class="at">data =</span> study_area, </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> <span class="cn">NA</span>, </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-extent" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-extent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-extent-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-extent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Study area extent
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The above code snippet loads and visualizes the study area boundary. However, we have only digitized a small portion of it for our training data. So, below, we add the roi to the map, see <a href="#fig-roi" class="quarto-xref">Figure&nbsp;2</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>roi <span class="ot">&lt;-</span> <span class="fu">vect</span>(<span class="at">x =</span> <span class="st">"data/vect.gpkg"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatvector</span>(<span class="at">data =</span> study_area, </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> <span class="cn">NA</span>, </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatvector</span>(<span class="at">data =</span> roi, </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">fill =</span> <span class="cn">NA</span>, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-roi" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-roi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-roi-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-roi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Study area (red) border and small portion used for training (blue) border
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Now, let us turn our attention to the roi. It has 29 polygons. Polygons 1:28 are tea fields and 29 is non-tea field. We can visualize them separately, <a href="#fig-sampling_areas" class="quarto-xref">Figure&nbsp;3</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatvector</span>(<span class="at">data =</span> roi,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">as.factor</span>(tea_no_tea)),  <span class="co"># map tea_no_tea to fill</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span>                  <span class="co"># border color</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"orange"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"green"</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Legend"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-sampling_areas" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sampling_areas-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-sampling_areas-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sampling_areas-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Region of interest where all tea plantations were digitized (green) and non tea areas (orange) used for model training
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>It is then time to obtain the training data from the satellite image. We will use the <code>extract</code> function from <code>terra</code> package to extract the values of the pixels in the polygons.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"data/s2_large.tif"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>tea_extract <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">extract</span>(<span class="at">x =</span> s2, <span class="at">y =</span> roi)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tea_extract)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  ID         B2         B3         B4        B5        B6        B7        B8
+1  1 0.03013333 0.06610000 0.03245000 0.1058750 0.3268500 0.4021000 0.4461900
+2  1 0.03083333 0.06640000 0.03309167 0.1123167 0.3263700 0.4008167 0.4367167
+3  1 0.03050000 0.06720000 0.03300000 0.1125333 0.3273400 0.4008167 0.4395000
+4  1 0.02990000 0.06695000 0.03306667 0.1150250 0.3363000 0.4116000 0.4460889
+5  1 0.03016667 0.06870000 0.03360000 0.1152000 0.3375000 0.4116000 0.4501750
+6  1 0.02980000 0.06816667 0.03485714 0.1242667 0.3263917 0.3895000 0.4527428
+        B8A       B11        B12
+1 0.4390500 0.1833600 0.08485000
+2 0.4289333 0.1897375 0.08923333
+3 0.4295333 0.1901750 0.08923333
+4 0.4432875 0.1936333 0.09263334
+5 0.4438750 0.1939500 0.09220000
+6 0.4210000 0.2034333 0.10420000</code></pre>
+</div>
+</div>
+</section>
+<section id="visualize-rgb-of-the-s2-for-study-area" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="visualize-rgb-of-the-s2-for-study-area"><span class="header-section-number">2.2</span> <strong>Visualize RGB of the s2 for Study Area</strong></h3>
+<p>The next step is to make a true color composite map from Sentinel-2 images within the study area showing the study extent and region of interest (where training points will be obtained from) <a href="#fig-study-area" class="quarto-xref">Figure&nbsp;4</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRGB</span>(<span class="at">x =</span> s2, <span class="at">r =</span> <span class="dv">3</span>, <span class="at">g =</span> <span class="dv">2</span>, <span class="at">b =</span> <span class="dv">1</span>, <span class="at">stretch =</span> <span class="st">"lin"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(study_area, <span class="at">add =</span> T, <span class="at">lwd =</span> <span class="dv">4</span>, <span class="at">border =</span> <span class="st">'red'</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roi, <span class="at">add =</span> T, <span class="at">fill =</span> <span class="cn">FALSE</span>, <span class="at">border =</span> <span class="st">'blue'</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-study-area" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-study-area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-study-area-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-study-area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Study area (red) on background RGB image of Sentinel-2. Training area is shown in blue borders
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Since we know the that polygons 1 to 28 are tea plantations and 29th is non-tea field, we can subset the data to have tea and non-tea extracted values.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tea_df <span class="ot">&lt;-</span> tea_extract[tea_extract<span class="sc">$</span>ID <span class="sc">!=</span> <span class="dv">29</span>, ]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>no_tea_df <span class="ot">&lt;-</span> tea_extract[tea_extract<span class="sc">$</span>ID <span class="sc">==</span> <span class="dv">29</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Great, now we have 2226 tea records and 3884 non-tea records. We can combine them into one data frame. But before that, we add column called <em>tea</em> which will contain a value of 1 for tea and 0 for non-tea. We then bind them and drop the ID column as follows.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tea_df<span class="sc">$</span>tea <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>no_tea_df<span class="sc">$</span>tea <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>tea_no_tea_df <span class="ot">&lt;-</span> <span class="fu">rbind</span>(tea_df, no_tea_df)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>tea_no_tea_df<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tea_no_tea_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>          B2         B3         B4        B5        B6        B7        B8
+1 0.03013333 0.06610000 0.03245000 0.1058750 0.3268500 0.4021000 0.4461900
+2 0.03083333 0.06640000 0.03309167 0.1123167 0.3263700 0.4008167 0.4367167
+3 0.03050000 0.06720000 0.03300000 0.1125333 0.3273400 0.4008167 0.4395000
+4 0.02990000 0.06695000 0.03306667 0.1150250 0.3363000 0.4116000 0.4460889
+5 0.03016667 0.06870000 0.03360000 0.1152000 0.3375000 0.4116000 0.4501750
+6 0.02980000 0.06816667 0.03485714 0.1242667 0.3263917 0.3895000 0.4527428
+        B8A       B11        B12 tea
+1 0.4390500 0.1833600 0.08485000   1
+2 0.4289333 0.1897375 0.08923333   1
+3 0.4295333 0.1901750 0.08923333   1
+4 0.4432875 0.1936333 0.09263334   1
+5 0.4438750 0.1939500 0.09220000   1
+6 0.4210000 0.2034333 0.10420000   1</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="build-the-sdmdata-object-and-model" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="build-the-sdmdata-object-and-model"><span class="header-section-number">3</span> <strong>Build the sdmData object and model</strong></h2>
+<p>In this next step, we will build the machine learning model which will be able to take the current tea and no tea points and predictor variables to calibrate a model that can predict where else the crop could be within the study area. For that, we will use <code>sdm</code> package <span class="citation" data-cites="sdm">(<a href="#ref-sdm" role="doc-biblioref">Naimi and Araujo 2016</a>)</span> version 1.2.57. There are several other packages that can achieve this, such as <code>caret</code> <span class="citation" data-cites="kuhn2008">(<a href="#ref-kuhn2008" role="doc-biblioref">Kuhn 2008</a>)</span>, <code>mlr3</code> <span class="citation" data-cites="mlr3">(<a href="#ref-mlr3" role="doc-biblioref">Lang et al. 2019</a>)</span>, <code>tidymodels</code> <span class="citation" data-cites="tidymodels">(<a href="#ref-tidymodels" role="doc-biblioref">Kuhn and Wickham 2020</a>)</span> among others. I prefer <code>sdm</code> because of it’s simplicity, extensibile, and ease of use.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sdm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>sdm 1.2-57 (2025-05-13)</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sdm_data <span class="ot">&lt;-</span> <span class="fu">sdmData</span>(<span class="at">formula =</span> tea <span class="sc">~</span>., </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">train =</span> tea_no_tea_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Have a glance at the sdm_data object:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sdm_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>class                                 : sdmdata 
+=========================================================== 
+number of species                     :  1 
+species names                         :  tea 
+number of features                    :  10 
+feature names                         :  B2, B3, B4, ... 
+type                                  :  Presence-Absence 
+has independent test data?             :  FALSE 
+number of records                     :  6024 
+has Coordinates?                      :  FALSE </code></pre>
+</div>
+</div>
+<p>Then the model calibration stage comes with sdm function from <code>sdm</code> package itself:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>tea_model <span class="ot">&lt;-</span> <span class="fu">sdm</span>(<span class="at">formula =</span> tea <span class="sc">~</span>.,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> sdm_data, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">methods =</span> <span class="st">"rf"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">replications =</span> <span class="st">"boot"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">test.p =</span> <span class="dv">30</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">n =</span> <span class="dv">5</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">parallelSettings =</span> <span class="fu">list</span>(<span class="at">ncores =</span> <span class="dv">10</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">method =</span> <span class="st">"parallel"</span>))</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">write.sdm</span>(tea_model, <span class="st">"model/tea_model.sdm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>View the model summary:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tea_model <span class="ot">&lt;-</span> <span class="fu">read.sdm</span>(<span class="st">"model/tea_model.sdm"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>tea_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>class                                 : sdmModels 
+======================================================== 
+number of species                     :  1 
+number of modelling methods           :  1 
+names of modelling methods            :  rf 
+replicate.methods (data partitioning) :  bootstrap 
+number of replicates (each method)    :  5 
+toral number of replicates per model  :  5 (per species) 
+------------------------------------------
+model run success percentage (per species)  :
+------------------------------------------
+method          tea              
+---------------------- 
+rf         :        100   %
+
+###################################################################
+model Mean performance (per species), using test dataset (generated using partitioning):
+-------------------------------------------------------------------------------
+
+ ## species   :  tea 
+=========================
+
+methods    :     AUC     |     COR     |     TSS     |     Deviance 
+-------------------------------------------------------------------------
+rf         :     0.99    |     0.91    |     0.9     |     0.3      </code></pre>
+</div>
+</div>
+<p>Other checks on the model include looking at the response curves <a href="#fig-response_curve" class="quarto-xref">Figure&nbsp;5</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rcurve</span>(tea_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>The id argument is not specified; The modelIDs of 5 successfully fitted models are assigned to id...! </code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-response_curve" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-response_curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-response_curve-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-response_curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Response curve of all the predictor variables used to build the tea_model
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We can also check for the area under the receiver operating characteristic curve (AUC), <a href="#fig-roc" class="quarto-xref">Figure&nbsp;6</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">roc</span>(tea_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-roc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-roc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-roc-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-roc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Area under the receiver operating characteristic curve of the tea_model
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Visualizing how each of the predictor variables used in the model was important for the crop under mapping is also useful <a href="#fig-var_imp" class="quarto-xref">Figure&nbsp;7</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">getVarImp</span>(tea_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+The variable importance for all the models are combined (averaged)... </code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-var_imp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-var_imp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-var_imp-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-var_imp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Plot of the variable importance indicating which variables were most important in predicting the tea plantations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>One can redo what we have done up to here several times, tuning the modeling process until a model with desirable characteristics is attained. Basically, this is a model that meets the specific needs of the project. For example, one can change the number of replications (20 etc), replication methods (sub, cv), model methods (brt, gam, glm, rf, svm). One can also add occurrence records (e.g.&nbsp;from tea factories), one can also add predictor variables (soil, elevation).</p>
+</div>
+</div>
+</section>
+<section id="assess-area-of-applicability" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="assess-area-of-applicability"><span class="header-section-number">4</span> <strong>Assess Area of Applicability</strong></h2>
+<p>It is important to assess the area of applicability of the model. This helps us to know how far we can use the model to make predictions. We can do this by using the <code>aoa</code> function from the <code>sdm</code> package.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tea_aoa <span class="ot">&lt;-</span> sdm<span class="sc">::</span><span class="fu">aoa</span>(<span class="at">x =</span> s2, <span class="at">d =</span> tea_model)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tea_aoa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-aoa" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-aoa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-aoa-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-aoa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Area of Applicability of the tea_model
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Values close to 1 in <a href="#fig-aoa" class="quarto-xref">Figure&nbsp;8</a> indicate areas that are similar to the training data. We notice that we can use our model to make predictions in most parts of the study area with minimal caution to the northeastern end,</p>
+</section>
+<section id="predict-tea-plantations-throughout-the-study-area" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="predict-tea-plantations-throughout-the-study-area"><span class="header-section-number">5</span> <strong>Predict tea plantations throughout the study area</strong></h2>
+<p>Finally, we get to the point where we use the trained model to predict the tea plantations over the study area. For this, we use <em>predict</em> function.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(<span class="at">object =</span> tea_model, s2)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>pred</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster 
+size        : 187, 335, 5  (nrow, ncol, nlyr)
+resolution  : 10, 10  (x, y)
+extent      : 4167740, 4171090, -40980, -39110  (xmin, xmax, ymin, ymax)
+coord. ref. : WGS 84 / Pseudo-Mercator (EPSG:3857) 
+source(s)   : memory
+names       : id_1__~e_boot, id_2__~e_boot, id_3__~e_boot, id_4__~e_boot, id_5__~e_boot 
+min values  : -5.101475e-16, -5.143774e-15,  -5.12923e-17,  -3.60878e-15, -1.322886e-15 
+max values  :  1.000000e+00,  1.000000e+00,   1.00000e+00,   1.00000e+00,  1.000000e+00 </code></pre>
+</div>
+</div>
+<p>This is giving us five layers of <code>spatRaster</code> corresponding to the five runs of the model.</p>
+<p>We can visualize them, see</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatraster</span>(<span class="at">data =</span> pred) <span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>lyr, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_whitebox_c</span>(</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"pi_y_g"</span>, </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.breaks =</span> <span class="dv">10</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">""</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-likelihood" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-likelihood-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Predicted likelihood of pixels being tea
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Normally, we take the median of the predictions since we only have one method ‘maxent’. When more than one method, we may be careful to only get median of each method separately <a href="#fig-median-likelihood" class="quarto-xref">Figure&nbsp;10</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>pred_median <span class="ot">&lt;-</span> <span class="fu">median</span>(pred)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatraster</span>(<span class="at">data =</span> pred_median) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_whitebox_c</span>(</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"pi_y_g"</span>, </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.breaks =</span> <span class="dv">10</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">""</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-median-likelihood" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-median-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-median-likelihood-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-median-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Predicted median likelihood of pixels being tea
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>It is also useful to quantify the uncertainty across the models run. This we can give using standard deviation metric or variance, among others <a href="#fig-stdev-likelihood" class="quarto-xref">Figure&nbsp;11</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>pred_uncertainty <span class="ot">&lt;-</span> <span class="fu">stdev</span>(pred)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatraster</span>(<span class="at">data =</span> pred_uncertainty) <span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_whitebox_c</span>(</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"gn_yl"</span>, </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n.breaks =</span> <span class="dv">10</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">""</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-stdev-likelihood" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stdev-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-stdev-likelihood-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stdev-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Uncertainty around predicted likelihood of pixels being tea
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="binarize-the-likelihood-map-for-tea-no_tea-map" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="binarize-the-likelihood-map-for-tea-no_tea-map"><span class="header-section-number">5.1</span> <strong>Binarize the likelihood map for tea-no_tea map</strong></h3>
+<p>We now need to make an important step which is to binarize the map into tea-no_tea map. This is a map which we can therefore use to tell how much land is under tea. However, since we actually have not been in the field to make the observation of the fields, we use threshold based evaluation metrics to create a cut-off point along the 0 to 1 likelihood scale. To get the binary map, we are going to use <code>pa</code> function as follows:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tea_no_tea_map <span class="ot">&lt;-</span> <span class="fu">pa</span>(<span class="at">x =</span> pred_median,</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">y =</span> tea_model, </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">id =</span> <span class="st">'ensemble'</span>, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">opt =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now, with this map we can show the potential tea map of the study area <a href="#fig-tea_no_tea" class="quarto-xref">Figure&nbsp;12</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_spatraster</span>(<span class="at">data =</span> <span class="fu">as.factor</span>(tea_no_tea_map)) <span class="sc">+</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"pink"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"darkgreen"</span>), <span class="co"># Map levels to colors</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No tea"</span>, <span class="st">"Tea"</span>),</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">na.translate =</span> FALSE<span class="co"># Reverse legend order</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">""</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-tea_no_tea" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tea_no_tea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-tea_no_tea-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tea_no_tea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Predicted tea plantations and background
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="testing-the-model-on-independent-data" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="testing-the-model-on-independent-data"><span class="header-section-number">6</span> <strong>Testing the model on independent data</strong></h2>
+<p>We can now test the model on independent data. We have a geopackage file called <code>eval.gpkg</code> which contains 200 points of tea and non-tea. We can visualize these <a href="#fig-interactive" class="quarto-xref">Figure&nbsp;13</a>, and test the model.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapview)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> <span class="fu">vect</span>(<span class="st">"data/eval.gpkg"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>e1 <span class="ot">&lt;-</span> <span class="fu">extract</span>(pred_median, test_data)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>e2 <span class="ot">&lt;-</span> <span class="fu">extract</span>(tea_no_tea_map, test_data)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>eval1 <span class="ot">&lt;-</span> <span class="fu">evaluates</span>(<span class="at">x =</span> test_data<span class="sc">$</span>tea_no_tea,</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">p =</span> e1<span class="sc">$</span>median)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>eval2 <span class="ot">&lt;-</span> <span class="fu">evaluates</span>(<span class="at">x =</span> test_data<span class="sc">$</span>tea_no_tea,</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>                   <span class="at">p =</span> e2<span class="sc">$</span>median)</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>eval1<span class="sc">@</span>threshold_based</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       criteria threshold sensitivity specificity  TSS    MCC     F1 Kappa
+1         sp=se   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+2    max(se+sp)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+3     min(cost)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+4    minROCdist   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+5    max(kappa)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+6  max(ppv+npv)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+7       ppv=npv   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+8      max(NMI)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+9      max(ccr)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+10   prevalence   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+11     max(MCC)   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+12          P10   0.61096        0.90           1 0.90 0.9045 0.9474  0.90
+13           P5   0.56970        0.95           1 0.95 0.9512 0.9744  0.95
+14           P1   0.29436        0.99           1 0.99 0.9900 0.9950  0.99
+15           P0   0.17800        1.00           1 1.00 1.0000 1.0000  1.00
+      NMI    phi ppv    npv   ccr   mcr ommission commission prevalence
+1  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+2  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+3  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+4  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+5  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+6  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+7  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+8  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+9  1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+10 1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+11 1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500
+12 0.7583 0.9045   1 0.9091 0.950 0.050      0.10          0      0.450
+13 0.8550 0.9512   1 0.9524 0.975 0.025      0.05          0      0.475
+14 0.9595 0.9900   1 0.9901 0.995 0.005      0.01          0      0.495
+15 1.0000 1.0000   1 1.0000 1.000 0.000      0.00          0      0.500</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>eval1<span class="sc">@</span>statistics</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Prevalence
+[1] 0.5
+
+$AUC
+[1] 1
+
+$COR
+          cor       p.value 
+ 9.600000e-01 1.120148e-111 
+
+$Deviance
+[1] 0.2133508</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mapview</span>(tea_no_tea_map) <span class="sc">+</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mapview</span>(test_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="fig-interactive" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-interactive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-6ed6285aab00d870a5a1" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-6ed6285aab00d870a5a1">{"x":{"options":{"minZoom":1,"maxZoom":52,"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}},"preferCanvas":false,"bounceAtZoomLimits":false,"maxBounds":[[[-90,-370]],[[90,370]]]},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron","CartoDB.Positron","CartoDB.Positron",{"errorTileUrl":"","noWrap":false,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["CartoDB.DarkMatter","CartoDB.DarkMatter","CartoDB.DarkMatter",{"errorTileUrl":"","noWrap":false,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["OpenStreetMap","OpenStreetMap","OpenStreetMap",{"errorTileUrl":"","noWrap":false,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["Esri.WorldImagery","Esri.WorldImagery","Esri.WorldImagery",{"errorTileUrl":"","noWrap":false,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["OpenTopoMap","OpenTopoMap","OpenTopoMap",{"errorTileUrl":"","noWrap":false,"detectRetina":false,"pane":"tilePane"}]},{"method":"addRasterImage","args":["data:image/png;base64,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",[[-0.3513289059643988,37.43944542236294],[-0.3681270706302352,37.46953898438095]],"tea_no_tea_map - 1","tea_no_tea_map - 1",{"tileSize":256,"zIndex":1,"minZoom":0,"opacity":0.8}]},{"method":"removeLayersControl","args":[]},{"method":"addControl","args":["","topright","imageValues-tea_no_tea_map - 1","info legend "]},{"method":"addImageQuery","args":["tea_no_tea_map - 1",[37.43944542236294,-0.3681272362030202,37.46962851840667,-0.3513289059643988],"mousemove",7,"Layer"]},{"method":"addLegend","args":[{"colors":["#040404 , #040404 0%, #4E1E2F 20%, #9B2D59 40%, #D4637A 60%, #EDB28D 80%, #FFFE9E 100%, #FFFE9E "],"labels":["0.0","0.2","0.4","0.6","0.8","1.0"],"na_color":"#BEBEBE","na_label":"NA","opacity":1,"position":"topright","type":"numeric","title":"tea_no_tea_map - 1","extra":{"p_1":0,"p_n":1},"layerId":null,"className":"info legend","group":"tea_no_tea_map - 1"}]},{"method":"addScaleBar","args":[{"maxWidth":100,"metric":true,"imperial":true,"updateWhenIdle":true,"position":"bottomleft"}]},{"method":"addHomeButton","args":[37.43944542236294,-0.3681270706302352,37.46953898438095,-0.3513289059643988,true,"tea_no_tea_map - 1","Zoom to tea_no_tea_map - 1","<strong> tea_no_tea_map - 1 <\/strong>","bottomright"]},{"method":"createMapPane","args":["point",440]},{"method":"addCircleMarkers","args":[[-0.3659098748043227,-0.3655145956807679,-0.365419323274026,-0.365257157472991,-0.3650666126530444,-0.3649510695155642,-0.3651355331203032,-0.365334186228843,-0.3652348596751138,-0.3654294586364882,-0.3655064873908644,-0.3617401859454684,-0.3610509809903066,-0.3612253093074411,-0.3632645449543394,-0.3626199357239226,-0.3624091201165857,-0.3586468715325459,-0.3597617621693072,-0.3652510762554044,-0.3652794552708046,-0.3650240441288817,-0.3650078275481968,-0.3647321456720878,-0.3646632252017502,-0.3639618580323364,-0.3651639121360725,-0.3649632319511574,-0.3641524028756665,-0.3633334654353764,-0.3637145551445549,-0.3657578443742355,-0.3672578778381769,-0.3648557971028557,-0.3652470221103381,-0.3659929847716675,-0.3530038270898816,-0.3642010526222504,-0.3646591710564041,-0.3657416277948864,-0.3652916177059525,-0.3663578577899612,-0.3652875635609117,-0.3650929645964713,-0.3639740204692528,-0.3662443417414258,-0.3678011331387537,-0.3671200369357573,-0.3622793874327235,-0.3610226019616244,-0.3600982564074726,-0.3603982633081471,-0.3597293289890703,-0.3589914741075089,-0.3544629898263008,-0.3558839692429041,-0.355748155242489,-0.3554461211149991,-0.3580468576063412,-0.3593482391126201,-0.3555495019248469,-0.3548197550070676,-0.3582738899073618,-0.3560522164346752,-0.3587684959722409,-0.3617523483853744,-0.3645416008410092,-0.3662281251629291,-0.3620564093779616,-0.3615780200783669,-0.3623320913357727,-0.3619023518096692,-0.3615131537307171,-0.3602158266805245,-0.3608320570524441,-0.3587401169364596,-0.3594049971803405,-0.3583995685001636,-0.3589306618893408,-0.3591739107595963,-0.3586752505686198,-0.3604063716026178,-0.3593036434877573,-0.3576252261752496,-0.3583671353150795,-0.3547994842585183,-0.3564292522990572,-0.3568062881479944,-0.3565103352786242,-0.3560562705838253,-0.3552819280616915,-0.3599279822162066,-0.3635442810211619,-0.3623442537748899,-0.3568143964456585,-0.3612253093074411,-0.3593766181465312,-0.3639618580323364,-0.3623158747502533,-0.3633861693322935,-0.3675842364368921,-0.3652490491828712,-0.3648274180861068,-0.366526104787833,-0.3652612116180573,-0.3665484025824914,-0.3640814553280886,-0.3667774617426173,-0.364150375802879,-0.3630760271652988,-0.3611786866183018,-0.3603516406147586,-0.3572867047718442,-0.358697548382616,-0.353102822448686,-0.3522919923225943,-0.3518865772330735,-0.3576110366555969,-0.354967731470047,-0.3520163100636356,-0.3526001077788249,-0.3520325266673223,-0.3556650451815469,-0.3525514579706147,-0.3524865915592902,-0.3538163529011454,-0.3597151394726745,-0.3615759930050195,-0.3618070793647988,-0.36096787097748,-0.3605056982093606,-0.3605908352999874,-0.3610286831820736,-0.3614705851898247,-0.3596137857835263,-0.3602989367002212,-0.3600921751864128,-0.3594962155027011,-0.3584218663148214,-0.3585799780900101,-0.3582637545369101,-0.3591191797643581,-0.3656179763762938,-0.3642882167508949,-0.3659382538176493,-0.3652976989235265,-0.3665382672212888,-0.3661977190782145,-0.3662342063798797,-0.3650098546207808,-0.3660355532912375,-0.3655409476228718,-0.3649693131689604,-0.3609840875654166,-0.3596786521447125,-0.3585353824613942,-0.3572299466909944,-0.3569623728766415,-0.3617705920452334,-0.3609840875654166,-0.3601002834811508,-0.3591272880599612,-0.3581137510527573,-0.366238260524488,-0.3671382805847262,-0.3655490559127371,-0.3675619386448162,-0.3679126220955963,-0.353005522837278,-0.3591313422077628,-0.3591435046511674,-0.3546717785417093,-0.3595975691931598,-0.3592043168679234,-0.3614503144559949,-0.3625125008477337,-0.3623016852378905,-0.3613550420063791,-0.3609739521979546,-0.3605989435942928,-0.3671666595941597,-0.364701739582297,-0.3605117794301405,-0.3596016233407577,-0.358985392885724,-0.3646814688557061,-0.362017894986143,-0.3630111608283739,-0.3629544027831845,-0.3658490626325906,-0.3647625517617769,-0.365257157472991,-0.3655166227532375,-0.3631125144796099,-0.3602989367002212,-0.3594212137710378,-0.3590462051035232,-0.3570272392565929,-0.3566583117144925,-0.3561637055359531],[37.46655596734809,37.46674043469678,37.46749046677387,37.46768304257745,37.46777628980865,37.46796075715734,37.46824860730585,37.46803576036505,37.46791413354174,37.4678735912673,37.46827495978423,37.4418859933531,37.44158598052226,37.44370634147533,37.44380364293398,37.44499153157498,37.44292387557869,37.44597670884381,37.4441117642197,37.46088815738177,37.46151656263556,37.46159764718443,37.46332880230289,37.46326798889124,37.4648126495473,37.46486940873151,37.44876804443862,37.45501763604328,37.4582285841787,37.45560144479517,37.44976335727623,37.45219589374246,37.45267834680826,37.45183709461352,37.45505006986284,37.4555284687012,37.46883843005644,37.44381985984374,37.44184950530609,37.44242115137565,37.44369417879298,37.44037376651658,37.44039809188124,37.43969265630604,37.43983050003911,37.44262791697528,37.4411278528211,37.44058458634365,37.44697404879495,37.44792273801678,37.44810923247918,37.45503385295306,37.45462032175379,37.4551392628666,37.44399419162382,37.44422122836066,37.44328470182116,37.44444826509751,37.44197518635684,37.44294820094332,37.46861146066202,37.4653356448875,37.46444371484989,37.46003271539112,37.46130574280844,37.46081112706031,37.44635375199603,37.44442393973283,37.4542351701466,37.45352162611652,37.45133639752435,37.45097557128186,37.45090259518788,37.45106071005818,37.45235806284017,37.45053771471794,37.45341621620297,37.45410948909585,37.4534364873402,37.45268645526311,37.45249590657325,37.46325582620884,37.46615054460364,37.45725556959216,37.45623390427635,37.45548792642671,37.45737314218803,37.45567847511656,37.45547981797182,37.45524872700753,37.45721502731772,37.46375449618441,37.46362476090621,37.46044624659034,37.46274904777837,37.44019132628155,37.44019132628155,37.44814166629867,37.4483565403532,37.4475132610449,37.45412976023304,37.45783937834403,37.45978540751702,37.46071382560163,37.45387637101768,37.45394731999807,37.45179655233908,37.45315877276028,37.44326240357005,37.45393718442936,37.45972053987791,37.4596637806937,37.45945296086663,37.45907186348691,37.45654202556203,37.45584469844172,37.45414192291535,37.44004942832101,37.44069810471201,37.44017916359921,37.44202789131354,37.44460637996774,37.4632720431186,37.46602891778032,37.45976919060723,37.46139088158471,37.44741190535879,37.44885115610131,37.44828356425919,37.44985660450735,37.44920792811637,37.44689701847344,37.44680782546968,37.4470510791163,37.44860384822724,37.4429522551707,37.44362120269891,37.44355633505981,37.44234817528159,37.44278197761806,37.44381175138876,37.44395364934929,37.44331713564063,37.44090892453907,37.44152111288307,37.44126164232667,37.44184139685112,37.44602535957303,37.44734298349223,37.449880929872,37.44905386747349,37.44594022079671,37.44665376482681,37.46253011949637,37.46253822795126,37.46216523902643,37.46464642622199,37.46680327522204,37.46655191312054,37.46650326239121,37.4667059737634,37.46687625131604,37.46734654169951,37.46879998223801,37.46897431401817,37.46901891051997,37.46822022771363,37.46764047318919,37.46343928000054,37.45292362756849,37.45363717159858,37.45641330384057,37.45611329100974,37.45416219405254,37.45171952201772,37.45341824331663,37.45252225905157,37.45414192291533,37.45426557685236,37.45707312935713,37.46220983552832,37.45314863719162,37.46472953788453,37.46464845333566,37.4650417133977,37.45648121215032,37.45846372937029,37.45808263199058,37.45727178650184,37.45181885059004,37.45031067798099,37.45105260160319,37.45024175611444,37.44911062665766,37.45330675206191,37.44666390039538,37.44542938813877,37.4443083942506,37.44484557938689,37.44533005956642],6,null,"test_data",{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}},"pane":"point","stroke":true,"color":"#333333","weight":1,"opacity":[0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9],"fill":true,"fillColor":["#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#FDE333","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055","#4B0055"],"fillOpacity":[0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6]},null,null,["<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>1&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>2&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>3&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>4&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>5&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>6&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>7&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>8&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>9&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>10&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>11&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>12&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>13&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>14&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>15&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>16&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>17&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>18&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>19&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>20&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>21&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>22&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>23&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>24&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>25&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>26&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>27&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>28&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>29&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>30&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>31&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>32&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>33&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>34&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>35&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>36&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>37&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>38&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>39&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>40&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>41&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>42&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>43&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>44&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>45&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>46&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>47&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>48&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>49&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>50&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>51&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>52&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>53&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>54&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>55&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>56&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>57&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>58&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>59&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>60&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>61&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>62&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>63&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>64&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>65&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>66&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>67&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>68&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>69&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>70&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>71&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>72&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>73&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>74&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>75&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>76&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>77&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>78&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>79&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>80&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>81&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>82&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>83&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>84&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>85&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>86&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>87&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>88&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>89&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>90&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>91&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>92&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>93&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>94&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>95&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>96&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>97&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>98&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>99&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>100&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>1&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>101&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>102&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>103&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>104&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>105&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>106&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>107&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>108&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>109&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>110&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>111&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>112&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>113&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>114&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>115&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>116&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>117&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>118&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>119&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>120&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>121&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>122&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>123&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>124&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>125&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>126&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>127&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>128&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>129&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>130&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>131&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>132&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>133&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>134&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>135&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>136&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>137&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>138&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>139&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>140&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>141&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>142&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>143&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>144&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>145&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>146&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>147&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>148&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>149&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>150&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>151&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>152&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>153&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>154&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>155&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>156&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>157&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>158&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>159&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>160&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>161&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>162&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>163&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>164&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>165&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>166&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>167&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>168&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>169&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>170&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>171&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>172&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>173&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>174&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>175&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>176&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>177&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>178&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>179&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>180&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>181&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>182&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>183&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>184&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>185&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>186&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>187&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>188&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>189&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>190&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>191&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>192&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>193&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>194&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>195&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>196&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>197&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>198&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>199&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>","<div class='scrollableContainer'><table class=mapview-popup id='popup'><tr class='coord'><td><\/td><th><b>Feature ID&emsp;<\/b><\/th><td>200&emsp;<\/td><\/tr><tr><td>1<\/td><th>tea_no_tea&emsp;<\/th><td>0&emsp;<\/td><\/tr><tr><td>2<\/td><th>geometry&emsp;<\/th><td>sfc_POINT&emsp;<\/td><\/tr><\/table><\/div>"],{"maxWidth":800,"minWidth":50,"autoPan":true,"keepInView":false,"closeButton":true,"closeOnClick":true,"className":""},["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addHomeButton","args":[37.43969265630604,-0.3679126220955963,37.46901891051997,-0.3518865772330735,true,"test_data","Zoom to test_data","<strong> test_data <\/strong>","bottomright"]},{"method":"addLayersControl","args":[["CartoDB.Positron","CartoDB.DarkMatter","OpenStreetMap","Esri.WorldImagery","OpenTopoMap"],["tea_no_tea_map - 1","test_data"],{"collapsed":true,"autoZIndex":true,"position":"topleft"}]},{"method":"addLegend","args":[{"colors":["#4B0055 , #4B0055 0%, #723357 20%, #965D56 40%, #B98852 60%, #DBB548 80%, #FDE333 100%, #FDE333 "],"labels":["0.0","0.2","0.4","0.6","0.8","1.0"],"na_color":null,"na_label":"NA","opacity":1,"position":"topright","type":"numeric","title":"test_data","extra":{"p_1":0,"p_n":1},"layerId":null,"className":"info legend","group":"test_data"}]},{"method":"addHomeButton","args":[37.43944542236294,-0.3681270706302352,37.46953898438095,-0.3513289059643988,true,null,"Zoom to full extent","<strong>Zoom full<\/strong>","bottomleft"]}],"limits":{"lat":[-0.3681270706302352,-0.3513289059643988],"lng":[37.43944542236294,37.46953898438095]},"fitBounds":[-0.3681270706302352,37.43944542236294,-0.3513289059643988,37.46953898438095,[]]},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n  return (\n      function(el, x, data) {\n      // get the leaflet map\n      var map = this; //HTMLWidgets.find('#' + el.id);\n      // we need a new div element because we have to handle\n      // the mouseover output separately\n      // debugger;\n      function addElement () {\n      // generate new div Element\n      var newDiv = $(document.createElement('div'));\n      // append at end of leaflet htmlwidget container\n      $(el).append(newDiv);\n      //provide ID and style\n      newDiv.addClass('lnlt');\n      newDiv.css({\"position\":\"relative\",\"bottomleft\":\"0px\",\"background-color\":\"rgba(255, 255, 255, 0.7)\",\"box-shadow\":\"0 0 2px #bbb\",\"background-clip\":\"padding-box\",\"margin\":\"0\",\"padding-left\":\"5px\",\"padding-right\":\"5px\",\"color\":\"#333\",\"font-size\":\"9px\",\"font-family\":\"\\\"Helvetica Neue\\\", Arial, Helvetica, sans-serif\",\"text-align\":\"left\",\"z-index\":\"700\"});\n      return newDiv;\n      }\n\n\n      // check for already existing lnlt class to not duplicate\n      var lnlt = $(el).find('.lnlt');\n\n      if(!lnlt.length) {\n      lnlt = addElement();\n\n      // grab the special div we generated in the beginning\n      // and put the mousmove output there\n\n      map.on('mousemove', function (e) {\n      if (e.originalEvent.ctrlKey) {\n      if (document.querySelector('.lnlt') === null) lnlt = addElement();\n      lnlt.text(\n                           ' lon: ' + (e.latlng.lng).toFixed(5) +\n                           ' | lat: ' + (e.latlng.lat).toFixed(5) +\n                           ' | zoom: ' + map.getZoom() +\n                           ' | x: ' + L.CRS.EPSG3857.project(e.latlng).x.toFixed(0) +\n                           ' | y: ' + L.CRS.EPSG3857.project(e.latlng).y.toFixed(0) +\n                           ' | epsg: 3857 ' +\n                           ' | proj4: +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs ');\n      } else {\n      if (document.querySelector('.lnlt') === null) lnlt = addElement();\n      lnlt.text(\n                      ' lon: ' + (e.latlng.lng).toFixed(5) +\n                      ' | lat: ' + (e.latlng.lat).toFixed(5) +\n                      ' | zoom: ' + map.getZoom() + ' ');\n      }\n      });\n\n      // remove the lnlt div when mouse leaves map\n      map.on('mouseout', function (e) {\n      var strip = document.querySelector('.lnlt');\n      if( strip !==null) strip.remove();\n      });\n\n      };\n\n      //$(el).keypress(67, function(e) {\n      map.on('preclick', function(e) {\n      if (e.originalEvent.ctrlKey) {\n      if (document.querySelector('.lnlt') === null) lnlt = addElement();\n      lnlt.text(\n                      ' lon: ' + (e.latlng.lng).toFixed(5) +\n                      ' | lat: ' + (e.latlng.lat).toFixed(5) +\n                      ' | zoom: ' + map.getZoom() + ' ');\n      var txt = document.querySelector('.lnlt').textContent;\n      console.log(txt);\n      //txt.innerText.focus();\n      //txt.select();\n      setClipboardText('\"' + txt + '\"');\n      }\n      });\n\n      }\n      ).call(this.getMap(), el, x, data);\n}","data":null},{"code":"function(el, x, data) {\n  return (function(el,x,data){\n           var map = this;\n\n           map.on('keypress', function(e) {\n               console.log(e.originalEvent.code);\n               var key = e.originalEvent.code;\n               if (key === 'KeyE') {\n                   var bb = this.getBounds();\n                   var txt = JSON.stringify(bb);\n                   console.log(txt);\n\n                   setClipboardText('\\'' + txt + '\\'');\n               }\n           })\n        }).call(this.getMap(), el, x, data);\n}","data":null}]}}</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-interactive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Interactive map of tea map and test data points
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="area-under-tea" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="area-under-tea"><span class="header-section-number">7</span> Area under tea</h2>
+<p>To find the area under tea within the predicted area. We can use <code>expanse</code> function from <code>terra</code> package.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expanse</span>(<span class="at">x =</span> tea_no_tea_map, <span class="at">unit =</span> <span class="st">"ha"</span>, <span class="at">byValue =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  layer value     area
+1     1     0 445.6201
+2     1     1 173.2857</code></pre>
+</div>
+</div>
+<p>We can go ahead and visualize the area under each class; tea and no tea <a href="#fig-tea_area" class="quarto-xref">Figure&nbsp;14</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>tea_no_tea_map_f <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(tea_no_tea_map)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(tea_no_tea_map_f) <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">value =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),<span class="at">label =</span> <span class="fu">c</span>(<span class="st">"No tea"</span>, <span class="st">"Tea"</span>))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>df_area <span class="ot">&lt;-</span> <span class="fu">expanse</span>(tea_no_tea_map_f, </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">unit =</span> <span class="st">'ha'</span>, </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">byValue =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>df_area <span class="sc">|&gt;</span> </span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(value, <span class="sc">-</span>area), <span class="at">y =</span> area, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">round</span>(area, <span class="dv">2</span>)),</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.3</span>,</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">colour =</span> <span class="st">'black'</span>,</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="dv">5</span>,</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">fontface =</span> <span class="st">'bold'</span>) <span class="sc">+</span></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">'none'</span>,</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">'black'</span>,</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">face =</span> <span class="st">'bold'</span>,</span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">12</span></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">'black'</span>,</span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">face =</span> <span class="st">'bold'</span>,</span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">14</span></span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(</span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">'black'</span>,</span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">face =</span> <span class="st">'bold'</span>,</span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">16</span>,</span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">hjust =</span> <span class="fl">0.5</span></span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Land cover"</span>,</span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Area (ha)"</span>) <span class="sc">+</span></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb38-38"><a href="#cb38-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Class"</span>,</span>
+<span id="cb38-39"><a href="#cb38-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb38-40"><a href="#cb38-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"No tea"</span> <span class="ot">=</span> <span class="st">"orange"</span>,</span>
+<span id="cb38-41"><a href="#cb38-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Tea"</span> <span class="ot">=</span> <span class="st">"darkgreen"</span></span>
+<span id="cb38-42"><a href="#cb38-42" aria-hidden="true" tabindex="-1"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-tea_area" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tea_area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ml_tea_files/figure-html/fig-tea_area-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tea_area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Tea versus Background Areas
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="application-of-the-model-and-map" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="application-of-the-model-and-map"><span class="header-section-number">8</span> <strong>Application of the model and map</strong></h2>
+<p>Manual monitoring of tea plantations is costly and limited in scale. Using machine learning models and high resolution satellite images, we can automate and enhance the monitoring process, with applications including:</p>
+<ul>
+<li><strong>Pest and disease detection</strong>: Early identification for timely detection.</li>
+<li><strong>Drought monitoring</strong>: Could help detect water stress for irrigation planning.</li>
+<li><strong>Yield estimation</strong>: Predicting yield based on spectral data and plant health.</li>
+<li><strong>Damage assessment</strong>: Identifying hail and other weather related impacts.</li>
+<li><strong>Encroachment detection</strong>: Monitoring illegal expansion of plantations into protected areas.</li>
+<li><strong>Carbon quantification</strong>: This can make it possible to efficiently quantify carbon in tea plantations.</li>
+<li><strong>Tacking tea shift</strong>: Monitoring shifts in tea cultivation due to climate change and other reasons over time.</li>
+</ul>
+</section>
+<section id="conclusion-key-observations-from-the-workflow" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="conclusion-key-observations-from-the-workflow"><span class="header-section-number">9</span> <strong>Conclusion: Key Observations from the workflow</strong></h2>
+<p>The map of tea <em>Camellia sinensis</em> achieved superb accuracy in central Kenya region. We are therefore quite confident in our model output. We could finally send the map to stakeholders in the tea industry hailing from the region to help validate its accuracy. In national scale mapping event, we would encounter a lot of challenges including agro-forestry, pruning of tea, variations in cultivars among others.</p>
+</section>
+<section id="exercise-use-the-tea_model-to-predict-tea-elsewhere-or-at-different-time" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="exercise-use-the-tea_model-to-predict-tea-elsewhere-or-at-different-time"><span class="header-section-number">10</span> <strong>Exercise: Use the tea_model to predict tea elsewhere or at different time</strong></h2>
+<p>Since we have built our model, we can use it to make predictions across space and time. For instance, we can use the model to make prediction in another country, say Uganda. We can also use the same model to make predictions into the past, say 2020.</p>
+<p><strong>Feel free to reach us out if you got any questions</strong> <a href="https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics">Land Economics Group</a>.</p>
+</section>
+<section id="references" class="level2 unnumbered" data-number="11">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">11 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-tidyterra" class="csl-entry" role="listitem">
+Hernangómez, Diego. 2023. <span>“Using the <span></span>Tidyverse<span></span> with <span></span>Terra<span></span> Objects: The <span></span>Tidyterra<span></span> Package”</span> 8: 5751. <a href="https://doi.org/10.21105/joss.05751">https://doi.org/10.21105/joss.05751</a>.
+</div>
+<div id="ref-terra" class="csl-entry" role="listitem">
+Hijmans, Robert J. 2025. <span>“Terra: Spatial Data Analysis.”</span> <a href="https://doi.org/10.32614/CRAN.package.terra">https://doi.org/10.32614/CRAN.package.terra</a>.
+</div>
+<div id="ref-kuhn2008" class="csl-entry" role="listitem">
+Kuhn, Max. 2008. <span>“Building Predictive Models in<span><em>R</em></span>Using the<span><strong>caret</strong></span>Package.”</span> <em>Journal of Statistical Software</em> 28 (5). <a href="https://doi.org/10.18637/jss.v028.i05">https://doi.org/10.18637/jss.v028.i05</a>.
+</div>
+<div id="ref-tidymodels" class="csl-entry" role="listitem">
+Kuhn, Max, and Hadley Wickham. 2020. <span>“Tidymodels: A Collection of Packages for Modeling and Machine Learning Using Tidyverse Principles.”</span> <a href="https://www.tidymodels.org">https://www.tidymodels.org</a>.
+</div>
+<div id="ref-mlr3" class="csl-entry" role="listitem">
+Lang, Michel, Martin Binder, Jakob Richter, Patrick Schratz, Florian Pfisterer, Stefan Coors, Quay Au, Giuseppe Casalicchio, Lars Kotthoff, and Bernd Bischl. 2019. <span>“<span></span>Mlr3<span></span>: A Modern Object-Oriented Machine Learning Framework in <span></span>r<span></span>.”</span> <a href="https://doi.org/10.21105/joss.01903">https://doi.org/10.21105/joss.01903</a>.
+</div>
+<div id="ref-sdm" class="csl-entry" role="listitem">
+Naimi, Babak, and Miguel B. Araujo. 2016. <span>“Sdm: A Reproducible and Extensible r Platform for Species Distribution Modelling”</span> 39: 368–75. <a href="https://doi.org/10.1111/ecog.01881">https://doi.org/10.1111/ecog.01881</a>.
+</div>
+<div id="ref-sf" class="csl-entry" role="listitem">
+Pebesma, Edzer, and Roger Bivand. 2023. <span>“<span></span>Spatial Data Science: With Applications in r<span></span>.”</span> <a href="https://doi.org/10.1201/9780429459016">https://doi.org/10.1201/9780429459016</a>.
+</div>
+<div id="ref-rcoreteam2023" class="csl-entry" role="listitem">
+R Core Team. 2023. <span>“R: A Language and Environment for Statistical Computing.”</span> <a href="https://www.r-project.org/">https://www.r-project.org/</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
