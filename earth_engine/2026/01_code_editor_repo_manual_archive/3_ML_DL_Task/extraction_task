@@ -1,0 +1,158 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED"),
+    cs_plus = ee.ImageCollection("GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED"),
+    roi = 
+    /* color: #98ff00 */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[37.43945418624308, -0.3514156794228275],
+          [37.43945418624308, -0.36806650472176583],
+          [37.46949492720988, -0.36806650472176583],
+          [37.46949492720988, -0.3514156794228275]]], null, false);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+SATELLITE DATA FOR AGRICULTURAL ECONOMISTS
+THEORY AND PRACTICE
+
+Mapping tea plantations in Central Kenya: Deep Learning Approach
+David Wuepper, Lisa Biber-Freudenberger, Hadi, Wyclife Agumba Oluoch
+Affiliations:
+  - Land Economics Group (https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics), University of Bonn, Bonn, Germany
+  - Center for Development Research (https://www.zef.de/zefhome.html), University of Bonn, Bonn, Germany
+
+This script, demonstrates how to create, visualize, and export to drive a cloud-free Sentinel-2 composite
+for use in machine and deep learning models. 
+*/
+
+// --------------------------------------------
+// 1. Band Selection
+// --------------------------------------------
+// Define relevant Sentinel-2 bands for vegetation/cropland analysis.
+// These include visible, red-edge, near-infrared, and shortwave-infrared bands.
+
+var ml_bands = ['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B11', 'B12'];
+
+s2 = s2.select(ml_bands);
+
+print('ml_bands', ml_bands)
+// --------------------------------------------
+// 2. Define Time Range for Image Collection
+// --------------------------------------------
+
+var start_date = "2023-01-01";  // Start date of image collection
+var end_date = "2023-12-31";    // End date of image collection
+
+// --------------------------------------------
+// 3. Create Cloud-Free Composite
+// --------------------------------------------
+// Filter by region of interest (roi), apply cloud score mask, and generate a median composite.
+
+var composite = s2
+  .filterBounds(roi)                          // Keep images overlapping the region of interest
+  .filterDate(start_date, end_date)           // Filter only for the dates needed
+  .linkCollection(cs_plus, 'cs')              // Attach the cloud score band 
+  .map(function(img){
+    return img.updateMask(img.select('cs').gte(0.6));  // Mask out cloudy pixels (cloud score < 0.6)
+  })
+  .median()                                   // Reduce image collection to a single median image
+  .multiply(0.0001)                           // Scale reflectance values
+  .select(ml_bands)                       // Re-select bands post-scaling, 'cs' was linked
+  .clip(roi);                                 // Clip the final composite to the region of interest
+
+// Print image properties to console to verify band structure and completeness
+
+print(composite);  // Expecting a single image with 10 bands
+
+// If you want to know how many images contributed to the median
+
+print('Images used', s2.filterBounds(roi).filterDate(start_date, end_date).linkCollection(cs_plus, 'cs')
+  .map(function(img){
+    return img.updateMask(img.select('cs').gte(0.6));
+  }));
+
+// --------------------------------------------
+// 4. Visualization of Composite
+// --------------------------------------------
+// Add a true-color layer (RGB: B4, B3, B2) to the map for visual inspection
+
+Map.addLayer(
+  composite, 
+  {
+    min: 0.019347, // Obtained from the Layers panel
+    max: 0.124803,  // Obtained from the Layers panel, these are to enhance visualization
+    bands: ['B4', 'B3', 'B2']  // Bands to use for visualization, RGB (true color composite)
+  }, 
+  'composite',                 // Name of the layers in Layers panel
+  false                        // Do not display layer by default (can be turned on in Layers panel), makes computations faster
+);
+
+// --------------------------------------------
+// 5. Display ROI Outline
+// --------------------------------------------
+// Paint the ROI geometry outline in red
+
+var roi_outline = ee.Image().paint({ // Paints the edges of roi as new raster layer
+  featureCollection: roi,            // The region of interest to be visualized
+  width: 4                           // Outline thickness in pixels
+});
+
+// Center the map view on the ROI and add the red border outline
+
+Map.centerObject({object: roi, zoom: 14});
+Map.addLayer(roi_outline, {palette: 'red'}, 'roi');
+
+// --------------------------------------------
+// 6. Export Image Composite to Google Drive
+// --------------------------------------------
+// Save the processed image composite for offline use (e.g., in Python or GIS software)
+
+Export.image.toDrive({               // Function to export image to Google drive
+  image: composite,                  // The image to be exported
+  description: 's2_image',           // Task name to appear in the Tasks tab while exporting
+  folder: 's2_data',                 // Folder in your Google Drive to hold the image
+  fileNamePrefix: 'tutorial',        // Prefix for output file name
+  region: roi,                       // Export region bounds
+  scale: 10,                         // Spatial resolution (Sentinel-2 native resolution)
+  maxPixels: 1e13,                   // Allow large exports
+  crs: "EPSG:3857"                   // Set coordinate reference system (Web Mercator)
+});
+
+// --------------------------------------------
+// 7. Export ROI Geometry as Shapefile
+// --------------------------------------------
+// This allows importing the ROI into other platforms (e.g., QGIS, ArcGIS)
+
+Export.table.toDrive({
+  collection: ee.FeatureCollection(roi),  
+  description: 'Export_ROI',        // Task name to appear in the Tasks tab while exporting
+  fileFormat: 'SHP',                // Export format
+  folder: 'GEE_Exports',            // Folder in Google Drive
+  fileNamePrefix: 'roi',            // Output file name prefix
+  selectors: null                   // Export all properties
+});
+
+// --------------------------------------------
+// 8. Script Summary
+// --------------------------------------------
+/*
+This script demonstrates the workflow for generating a small cloud-free Sentinel-2 image composite
+at the foot of Mount Kenya, specifically tailored for agricultural analysis such as mapping tea plantations.
+It includes:
+
+- Selecting and preprocessing relevant spectral bands
+- Applying a cloud mask using a cloud score (`cs_plus`)
+- Generating a clean median composite
+- Visualizing the composite and ROI
+- Exporting both the composite image and ROI geometry for further analysis in GIS or machine learning tools
+
+This serves as a foundational pipeline that can be adapted by those interested in remote sensing applications
+in agriculture, particularly those involving machine learning and deep learning models.
+
+Adapt and extend this script to fit your specific region, time period, or classification objectives.
+/////////////////E N D //////////////////
+*/

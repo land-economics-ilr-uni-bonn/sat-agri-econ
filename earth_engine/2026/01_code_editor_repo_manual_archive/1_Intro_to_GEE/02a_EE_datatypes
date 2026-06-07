@@ -1,0 +1,42 @@
+/*
+ Earth Engine data types
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+ 
+/*
+var variableName = ee.ContainerType(value);
+*/
+
+
+var variable_client = 1
+var variable_server = ee.Number(1)          
+
+var str_client = 'Hello, World!'
+var str_server = ee.String('Hello, World!')
+
+var list_client = [1.23, 8, -3]
+var list_server = ee.List([1.23, 8, -3])
+
+print('list_client[2]', list_client[2])
+print('list_server.get(2)', list_server.get(2))  // .get() is EE (server) method for EE list object.
+
+
+var dictionary_client = {
+  a: 'Hello',
+  b: 10,
+  c: 0.1343,
+  d: list_client
+}
+var dictionary_server = ee.Dictionary({
+  a: 'Hello',
+  b: 10,
+  c: 0.1343,
+  d: list_client
+})
+
+print('dictionary_client.b', dictionary_client.b)
+print("dictionary_server.get('b')", dictionary_server.get('b')) 
+

@@ -1,0 +1,416 @@
+
+  
+var points = ee.FeatureCollection("users/hadicu06/tutorial_investment_and_finance/sandbox/samplesFromMapLc");
+
+/*
+'Tree cover (1)','Shrubland (2)','Grassland (3)','Cropland (4)','Built-up (5)','Bare / sparse vegetation (6)',
+'Snow and ice (7)','Open water (8)','Herbaceous wetland (9)','Mangroves (10)','Moss and lichen (11)'
+*/
+
+  
+
+var points_buffered = points.map(function(ft){
+  return ft.buffer(50);
+});  
+
+
+Map.addLayer(ee.Image().byte().paint(points_buffered, 'cyan', 2), {palette: 'cyan'}, "points_buffered");
+  
+  
+var aoi = points_buffered.geometry().bounds();
+
+Map.addLayer(ee.Image().byte().paint(aoi, 'yellow', 2), {palette: 'yellow'}, "aoi");
+  
+Map.centerObject(aoi);
+
+Map.setOptions('HYBRID');
+
+
+  
+var params = {
+  plots: points_buffered,
+  aoi: aoi,   
+  // startDate: '2020-01-01',
+  startDate: '2000-01-01',
+  endDate: '2024-12-31',
+  sceneOverallCloudThres: 30,
+  dataExtractionScale: 30,             //// Landsat native resolution is 30 meters
+  annualReducer: ee.Reducer.mean(),   /// what statistics to aggregate yearly Landsat data i.e. ee.Reducer.mean(), ee.Reducer.max(), ee.Reducer.median(), etc..
+  gdriveFolder: 'tutorial_satAgEcon',  /// change to own google drive folder
+  scriptLink: '748d9961e43e199a1a4dfd60531562dc'
+}; 
+
+
+
+/////#######################################################################
+////#### Import and filter Landsat data ##################################
+/////#######################################################################
+
+var L5 = ee.ImageCollection("LANDSAT/LT05/C02/T1_L2");
+var L7 = ee.ImageCollection("LANDSAT/LE07/C02/T1_L2");
+var L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2");
+
+
+var filterSpace = ee.Filter.bounds(params.aoi);
+
+var filterTime = ee.Filter.date(params.startDate, params.endDate);
+
+var filterOverallCloud = ee.Filter.lt('CLOUD_COVER', params.sceneOverallCloudThres)
+  
+  
+  
+L5 = L5.filter(filterOverallCloud).filter(filterSpace).filter(filterTime);  
+L7 = L7.filter(filterOverallCloud).filter(filterSpace).filter(filterTime);
+L8 = L8.filter(filterOverallCloud).filter(filterSpace).filter(filterTime);
+
+
+// Mapping of band-names to a uniform naming scheme
+var l5Bands = ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7'];
+var l5names = ['blue','green','red','nir','swir1','swir2'];
+
+var l7Bands = ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7'];
+var l7names = ['blue','green','red','nir','swir1','swir2'];
+
+var l8Bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7'];
+var l8names = ['blue','green','red','nir','swir1','swir2'];
+
+
+
+L5 = L5
+  .map(scaleL457sr)
+  .map(maskL457sr)
+  .select(l5Bands,l5names)
+  .map(addOpticIndices)
+
+
+L7 = L7
+  .map(scaleL457sr)
+  .map(maskL457sr)
+  .select(l7Bands,l7names)
+  .map(addOpticIndices)
+
+
+L8 = L8
+  .map(scaleL8sr)
+  .map(maskL8sr)
+  .select(l8Bands,l8names)
+  .map(addOpticIndices)
+      
+      
+      
+//////////////////////////////////////////////////
+////  Merge different Landsat sensors, select band
+//////////////////////////////////////////////
+
+/////////////////////////////////////
+var landsatColFinal = L5.merge(L7).merge(L8);
+
+landsatColFinal = landsatColFinal.select('ndvi');
+/////////////////////////////////////
+
+
+/////#######################################################################
+////#### Compositing landsat data ##################################
+/////#######################################################################
+
+
+//////////////////////////////////////////////////
+////  Make annual Landsat composites
+//////////////////////////////////////////////
+
+/*
+Note however new assets in data catalog (2024):
+https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_COMPOSITES_C02_T1_L2_ANNUAL_NDVI
+https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_COMPOSITES_C02_T1_L2_ANNUAL_EVI 
+*/
+
+
+
+/////////////////////////////////////////////////
+//// Create a function to aggregate Landsat data for a given year; we can then map the function over a list of years
+
+function makeYearlyLandsatComposite (year) {
+
+  var start = ee.Date.fromYMD(year, 1, 1)
+  
+  var end = start.advance(1, 'year')
+  
+  var filterYear = ee.Filter.date(start, end)
+
+  var landsatColFinalYear = landsatColFinal
+                            .filter(filterYear)
+
+  var reduced = landsatColFinalYear.reduce(params.annualReducer);
+  
+  var old_names = reduced.bandNames();
+  
+  var new_names = old_names.map(function(element){return ee.String(element).cat('_').cat(ee.Number(year).int().format())})
+  
+  return reduced.select(old_names, new_names);
+    
+}
+
+
+/////////////////////////////////////////////////
+/// List of years
+
+var yearStart = ee.Date(params.startDate).get('year');
+
+var yearEnd = ee.Date(params.endDate).get('year');
+
+var years = ee.List.sequence(yearStart, yearEnd); // end-points inclusive
+
+
+/////////////////////////////////////////////////
+/// Now map the function over a list of years
+
+/////////////////////////////////////
+var landsatAnnualComposite = years.map(makeYearlyLandsatComposite);        //// map over years
+/////////////////////////////////////
+
+
+landsatAnnualComposite = ee.ImageCollection(landsatAnnualComposite);
+
+
+
+////// Convert image collection (where image = composite for a year), into a single multi-bands image (where band = composite for a year)
+  
+var landsatAnnualCompositeAsBands = landsatAnnualComposite.toBands();
+
+print("landsatAnnualCompositeAsBands", landsatAnnualCompositeAsBands)
+
+
+/////#######################################################################
+////#### Extract and export Landsat data ##################################
+/////#######################################################################
+
+
+//////////////////////////////////////////////////
+////  Export by composites
+//////////////////////////////////////////////
+
+
+var extracted_by_composites = extractDataFuncV3(landsatAnnualCompositeAsBands, params.plots);
+
+print("extracted_by_composites.limit(2)", extracted_by_composites.limit(2));
+
+
+print("extracted_by_composites", extracted_by_composites);
+
+
+////////////////////////////////////////////////
+
+Export.table.toDrive({
+  collection: extracted_by_composites,
+  description: 'extracted_by_composites_' + params.scriptLink,
+  folder: params.gdriveFolder,                 
+  fileFormat: 'CSV' 
+});
+      
+
+
+
+//////////////////////////////////////////////////
+////  Export by date
+//////////////////////////////////////////////
+
+//// parameters for the zonalStats function
+  
+var this_params = {
+  reducer: ee.Reducer.mean(),            /// how to spatially aggregate pixels in an areal unit
+  scale: params.dataExtractionScale,                      
+  bands: ['ndvi'],                       //// we are exporting ndvi band values
+  bandsRename: ['is_NDVI'],
+  datetimeName: 'date',
+  datetimeFormat: 'YYYY-MM-dd'
+};
+
+
+
+var extracted_by_date = zonalStats(
+  landsatColFinal, 
+  params.plots, 
+  this_params
+);
+
+
+print("extracted_by_date.limit(3)", extracted_by_date.limit(3));
+
+
+
+////////////////////////////////////////////////
+
+Export.table.toDrive({
+  collection: extracted_by_date,
+  description: 'extracted_by_date_' + params.scriptLink,
+  folder: params.gdriveFolder,               
+  fileFormat: 'CSV' 
+});
+
+
+
+///////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% End of main body %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+///////%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+/////#######################################################################
+////#### General helper functions ##################################
+/////#######################################################################
+
+
+/////#######################################################################
+////#### Functions for Landsat data ##################################
+/////#######################################################################
+
+// Function to apply scaling factors
+function scaleL457sr(image) {
+  
+  // Apply the scaling factors to the appropriate bands.
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2)
+  // var thermalBand = image.select('ST_B6').multiply(0.00341802).add(149.0)
+  var thermalBand = image.select('ST_B.*').multiply(0.00341802).add(149.0)
+
+  
+  // Replace the original bands with the scaled ones
+  return image.addBands(opticalBands, null, true)
+      .addBands(thermalBand, null, true)
+      .copyProperties(image, ['system:time_start']) }
+
+function scaleL8sr(image) {
+  
+  // Apply the scaling factors to the appropriate bands.
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2)
+  var thermalBand = image.select('ST_B.*').multiply(0.00341802).add(149.0)
+  
+  // Replace the original bands with the scaled ones
+  return image.addBands(opticalBands, null, true)
+      .addBands(thermalBand, null, true)
+      .copyProperties(image, ['system:time_start']) }
+      
+
+// Cloud masking function for Landsat 4,5 and 7
+function maskL457sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(parseInt('11111', 2)).eq(0)
+  var saturationMask = image.select('QA_RADSAT').eq(0)
+
+  // Replace the original bands with the scaled ones and apply the masks.
+  return image
+      .updateMask(qaMask)
+      .updateMask(saturationMask)
+      .copyProperties(image, ['system:time_start'])
+}
+
+// Cloud masking function for Landsat 8
+function maskL8sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(parseInt('11111', 2)).eq(0)
+  var saturationMask = image.select('QA_RADSAT').eq(0)
+
+  // Replace the original bands with the scaled ones and apply the masks.
+  return image
+      .updateMask(qaMask)
+      .updateMask(saturationMask)
+      .copyProperties(image, ['system:time_start'])
+}
+
+
+
+/// Function to add vegetation indices bands 
+function addOpticIndices(image) {
+
+    var ndvi = ee.Image(image).normalizedDifference(['nir', 'red']).rename('ndvi')
+
+    return ee.Image(image).addBands([ndvi]) 
+  
+}
+
+
+
+/////#######################################################################
+////#### Functions for data extraction ##################################
+/////#######################################################################
+
+
+////####  Function to extract data from image collection #################################
+
+// Function to extract image properties and set them to feature properties
+function extractImageProperties(img) {
+  // Get the datetime of the image
+  var datetime = img.get('system:time_start');
+  // Convert the timestamp to a human-readable date string
+  var date = ee.Date(datetime).format(params.datetimeFormat);
+  
+  // Create a dictionary with the image properties
+  var imgProps = ee.Dictionary({
+    'datetime': date,
+    'timestamp': datetime
+  });
+
+  // Return the image properties dictionary
+  return imgProps;
+}
+
+
+// Modify the zonalStats function to handle unexpected properties
+function zonalStats(ic, fc, params) {
+  // Initialize internal params dictionary.
+  var _params = {
+    reducer: ee.Reducer.mean(),
+    scale: null,
+    crs: null,
+    bands: null,
+    datetimeName: 'datetime',
+    datetimeFormat: 'YYYY-MM-dd HH:mm:ss'
+  };
+
+  // Replace initialized params with provided params.
+  if (params) {
+    for (var param in params) {
+      _params[param] = params[param] || _params[param];
+    }
+  }
+
+  // Map the reduceRegions function over the image collection.
+  var results = ic.map(function(img) {
+    // Select bands
+    img = ee.Image(img.select(_params.bands));
+
+    // Define final image property dictionary to set in output features.
+    var imgProps = extractImageProperties(img);
+
+    // Subset points that intersect the given image.
+    var fcSub = fc.filterBounds(img.geometry());
+
+    // Reduce the image by regions.
+    return img.reduceRegions({
+      collection: fcSub,
+      reducer: _params.reducer,
+      scale: _params.scale,
+      crs: _params.crs,
+      tileScale: 1                         //// try changing to 4 if scaling errors
+    })
+    // Add metadata to each feature.
+    .map(function(f) {
+      return f.set(imgProps);
+    });
+  }).flatten();
+
+  return results;
+}
+
+
+
+function extractDataFuncV3(covariates_image, sample_locations) {
+  
+  var extracted = covariates_image.reduceRegions({
+    collection: sample_locations, 
+    reducer: ee.Reducer.mean(), 
+    scale: params.dataExtractionScale, 
+    tileScale: 4
+  })
+           
+  
+  return extracted;
+  
+}
+  

@@ -1,0 +1,481 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var geometry = 
+    /* color: #0b4a8b */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[136.23692980857416, -3.4133783313881265],
+          [136.23692980857416, -4.51758366860049],
+          [137.51134387107416, -4.51758366860049],
+          [137.51134387107416, -3.4133783313881265]]], null, false),
+    geometry2 = /* color: #d63000 */ee.Geometry.Point([89.27380837173902, 25.739739159229522]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+Map.centerObject(geometry2);
+
+
+
+////########################################################
+//// Image masking by thresholding
+////########################################################
+
+var run_part1 = false;
+
+if (run_part1) {
+  
+  // Load an image by name.
+  var image = ee.Image("USGS/SRTMGL1_003");
+  print('image', image);
+  
+  // Clip the image to area of interest
+  image = image.clip(geometry);
+  
+  // Display the image on the map.
+  Map.addLayer(image, {min:0, max:4000}, 'image');
+  
+  // Mask out high areas above 2000 m 
+  // That is, we want to keep pixels with values <= 2000 
+  var mask = image.lte(2000);
+  Map.addLayer(mask, {}, 'elevation <= 2000');
+  // Conditional operator returns 1 if true, 0 if false
+   
+   
+  // Apply the mask to the original image
+  var masked = image.mask(mask);
+  Map.addLayer(masked, {min:0, max:4000}, 'masked');
+  // Unmasked pixels have value of 1. Masked have no value.
+  
+  
+  // Mask out further areas >= 1000 m
+  var masked2 = masked.updateMask(masked.lt(1000));
+  Map.addLayer(masked2, {min:0, max:4000}, 'masked2');
+  
+}
+
+
+
+
+
+////########################################################
+//// Landsat-8 clouds and shadows masking
+//// UPDATE: Consider using pre-computed composites! https://jstnbraaten.medium.com/ditch-the-boilerplate-use-earth-engines-on-the-fly-landsat-composites-60fb9abe707c
+////########################################################
+
+var run_part2 = false;
+
+
+if (run_part2) {
+  
+  
+  var geometry = /* color: #d63000 */ee.Geometry.Point([104.74551156654312, -2.9714700800585607]);
+  
+  Map.centerObject(geometry, 10);
+  
+  // Load Landsat-8 surface reflectance
+  var L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2");
+  
+  // Filter the Landsat image collection
+  var filtered = L8.filterDate('2019-01-01', '2019-12-31')
+                   .filter('CLOUD_COVER_LAND < 50')
+                   .filterBounds(geometry);
+  
+  
+  print('filtered.size()', filtered.size());
+  print('filtered.first()', filtered.first());
+  
+  
+  // Apply scaling and offset
+  var applyScaleAndOffset = function(image) {
+    var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+    var thermalBands = image.select('ST_B.*').multiply(0.00341802).add(149.0);
+    return image.addBands(opticalBands, null, true).addBands(thermalBands, null, true);
+  };
+  
+  filtered = filtered.map(applyScaleAndOffset);
+  
+  Map.addLayer(filtered.first(), {min:0, max:0.2, bands:['SR_B4', 'SR_B3', 'SR_B2']}, 'filtered.first()');
+  
+  
+  ////-------------------------------------------------------------
+  // Mask non-clear pixels
+  // see also https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat8-9-Collection2-Level2-Science-Product-Guide-v5.pdf
+  
+  // Create a function to mask clouds and shadows in an image
+  // Bit 1: Dilated Cloud
+  // Bit 2: Cirrus (high confidence)
+  // Bit 3: Cloud
+  // Bit 4: Cloud Shadow
+  // Bit 5: Snow
+  var maskClouds = function (image) {
+    var qa = image.select('QA_PIXEL');
+    var cloudShadowBitMask = 1 << 4;
+    var cloudBitMask = 1 << 3;
+    var cloudMask = qa.bitwiseAnd(cloudShadowBitMask).eq(0).and(qa.bitwiseAnd(cloudBitMask).eq(0));
+    return image.updateMask(cloudMask);
+  };
+  
+  // Map the mask function to each image in the image collection
+  var cloudMasked = filtered.map(maskClouds);
+  
+  Map.addLayer(cloudMasked.first(), {min:0, max:0.2, bands:['SR_B4', 'SR_B3', 'SR_B2']}, 'cloudMasked.first()');
+  
+  
+  ////-------------------------------------------------------------
+  // Compute a median value for each pixel in the image
+  var composite = cloudMasked.median();
+
+  print('composite', composite);
+  
+  Map.addLayer(composite, {min:0, max:0.2, bands:['SR_B4', 'SR_B3', 'SR_B2']}, 'Median composite');
+    
+  
+}
+
+/*
+Note however new assets in data catalog (2024):
+https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_COMPOSITES_C02_T1_L2_ANNUAL_NDVI
+https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_COMPOSITES_C02_T1_L2_ANNUAL_EVI 
+*/
+
+
+
+/*
+
+#################
+Exercise
+#################
+
+Mask the `landsat_composite` (the cloud-masked median you built above) to keep **only cropland**, 
+using the ESA WorldCover land-cover map `ee.ImageCollection("ESA/WorldCover/v200")`. 
+Display the cropland-only composite and confirm the mask keeps fields and drops other land cover.
+
+*/
+
+
+
+
+////########################################################
+//// Bonus: Sentinel-2
+////########################################################
+
+///=============================================================
+/// New Cloud Score+ (2023)
+///=============================================================
+
+var run_part3 = false;
+
+
+if (run_part3) {
+  
+  var AOI = geometry2
+  
+  var START_DATE = '2023-01-01'     
+  var END_DATE = '2023-12-31'
+  var QA_BAND = 'cs';
+  var CLEAR_THRESHOLD = 0.60;
+
+  var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED');
+  var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+  
+  
+  var composite = s2
+      .filterBounds(AOI)
+      .filterDate(START_DATE, END_DATE)
+      .linkCollection(csPlus, [QA_BAND])
+      .map(function(img) {
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+      })
+      .median();
+  
+  var s2Viz = {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500};
+  
+  Map.addLayer(composite, s2Viz, 'median composite');
+  Map.centerObject(AOI, 11);
+
+
+}
+
+
+
+///=============================================================
+/// s2cloudless
+///=============================================================
+
+
+var run_part4 = false;
+
+
+if (run_part4) {
+  
+  var AOI = geometry;
+  
+  var START_DATE = '2023-06-01'     
+  var END_DATE = '2023-08-31'
+  var CLOUD_FILTER = 60       
+  var CLD_PRB_THRESH = 50
+  var NIR_DRK_THRESH = 0.15
+  var CLD_PRJ_DIST = 1
+  var BUFFER = 50
+  
+  
+  var params = {
+    'more_aggresive': false,
+    'evaluate_masks': false,
+    'projectShadow': true,
+    'morphologyFilter': true
+  }
+  
+  
+  
+  if(params.more_aggresive){
+    
+    CLD_PRB_THRESH = 40
+    CLD_PRJ_DIST = 2
+    BUFFER = 100
+  
+  }
+  
+  
+  // Build Sentinel-2 collection
+  
+  function get_s2_cld_col(aoi, start_date, end_date) {
+    
+    // Import Sentinel-2 surface reflectance   
+    var s2_col = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+                .filterBounds(aoi)
+                .filterDate(start_date, end_date)
+                .filter(ee.Filter.lte('CLOUDY_PIXEL_PERCENTAGE', CLOUD_FILTER))
+                
+                     
+    // Import and filter s2cloudless
+    var s2_cloudless_col = ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')
+                           .filterBounds(aoi)
+                           .filterDate(start_date, end_date)
+    
+    
+    // Join the two collections, by the 'system:index' property
+    var joined = ee.ImageCollection(ee.Join.saveFirst('s2cloudless').apply({
+      'primary': s2_col,
+      'secondary': s2_cloudless_col,
+      'condition': ee.Filter.equals({
+        'leftField': 'system:index',
+        'rightField': 'system:index'
+      })
+    }))
+    
+    return joined
+    
+  }
+  
+  
+  
+  
+  // Cloud components
+  
+  function add_cloud_bands(img){
+    
+    var cld_prb = ee.Image(img.get('s2cloudless')).select('probability')
+    
+    var is_cloud = cld_prb.gt(CLD_PRB_THRESH).rename('clouds')
+    
+    return img.addBands(ee.Image([cld_prb, is_cloud]))
+    
+  }
+  
+  
+  
+  // Cloud shadow components
+  // Define a function to add dark pixels, cloud projection, and identified shadows
+  // Input is output of add_cloud_bands()
+  
+  function add_shadow_bands(img){
+    
+    var not_water = img.select('SCL').neq(6)
+  
+  
+    // Dark NIR pixels that are not water (potential cloud shadow pixels)
+    var R_BAND_SCALE = 1e4
+    
+    var dark_pixels = img.select('B8').lt(NIR_DRK_THRESH * R_BAND_SCALE).multiply(not_water).rename('dark_pixels')
+    
+
+    if(params.projectShadow) {
+      
+      // Direction to project cloud shadow from clouds (assumes UTM projection)
+      var shadow_azimuth = ee.Number(90).subtract(ee.Number(img.get('MEAN_SOLAR_AZIMUTH_ANGLE')))
+      
+      var cld_proj = img.select('clouds').directionalDistanceTransform(shadow_azimuth, CLD_PRJ_DIST * 10)
+            .reproject({
+              'crs': img.select(0).projection(),
+              'scale': 100
+            })
+            .select('distance')
+            .mask()
+            .rename('cloud_transform')
+            
+        
+      // Intersection of dark pixels with cloud shadow projection
+      var shadows = cld_proj.multiply(dark_pixels).rename('shadows')
+   
+      
+    } else {
+      
+      var shadows = dark_pixels.rename('shadows')
+      
+    }
+    
+    
+    return img.addBands(ee.Image([dark_pixels, cld_proj, shadows]))
+    
+  }
+  
+  
+  
+  // Assemble the final cloud-shadow mask
+  
+  function add_cld_shdw_mask(img){
+    
+    var img_cloud = add_cloud_bands(img)
+    
+    var img_cloud_shadow = add_shadow_bands(img_cloud)
+    
+    // Set cloud and shadow as value 1
+    var is_cld_shdw = img_cloud_shadow.select('clouds').add(img_cloud_shadow.select('shadows')).gt(0)
+    
+    
+    if(params.morphologyFilter){
+      
+      // Remove small cloud-shadow patches and dilate remaining pixels by BUFFER input.
+      // 20 m scale is for speed, and assumes clouds don't require 10 m precision.
+      is_cld_shdw = is_cld_shdw.focal_min(2).focal_max(BUFFER * 2 / 20)
+          .reproject({'crs': img.select([0]).projection(), 'scale': 20})
+          .rename('cloudmask')
+  
+    } else {
+      
+      is_cld_shdw = is_cld_shdw.rename('cloudmask')
+      
+    }
+         
+    return img_cloud_shadow.addBands(is_cld_shdw)
+    // return img.addBands(is_cld_shdw) // if only the final cloud/cloud shadow mask along with the original image bands
+    
+  }
+  
+  
+  // Display 
+  
+  function display_cloud_layers(col){
+    
+    var img = col.mosaic()
+    
+    var clouds = img.select('clouds').selfMask()
+    var shadows = img.select('shadows').selfMask()
+    var dark_pixels = img.select('dark_pixels').selfMask()
+    var probability = img.select('probability')
+    var cloudmask = img.select('cloudmask').selfMask()
+    if(params.projectShadow) { var cloud_transform = img.select('cloud_transform') }
+
+  
+    Map.addLayer(img,
+                 {'bands': ['B4', 'B3', 'B2'], 'min': 0, 'max': 2500, 'gamma': 1.1},
+                 'S2 image', true, 1)
+                 
+    Map.addLayer(probability,
+                 {'min': 0, 'max': 100},
+                 'probability (cloud)', false, 1)
+                 
+    Map.addLayer(clouds,
+                 {'palette': 'e056fd'},
+                 'clouds', false, 1)
+    
+    if(params.projectShadow){
+      Map.addLayer(cloud_transform,
+                 {'min': 0, 'max': 1, 'palette': ['white', 'black']},
+                 'cloud_transform', false, 1)
+    }             
+                   
+    Map.addLayer(dark_pixels,
+                 {'palette': 'orange'},
+                 'dark_pixels', false, 1)
+                 
+    Map.addLayer(shadows, {'palette': 'yellow'},
+                 'shadows', false, 1)
+                 
+    Map.addLayer(cloudmask, {'palette': 'orange'},
+                 'cloudmask', true, 0.5)
+    
+  }
+  
+  
+  // Display and evaluate mask component layers
+  
+  if(params.evaluate_masks){
+    
+    CLOUD_FILTER = 60
+    START_DATE = '2023-07-01'  // For evaluation, update to short interval to select one scene
+    END_DATE = '2023-07-30'
+   
+    // Apply the function to build the collection
+    var s2_cld_col_eval  = get_s2_cld_col(AOI, START_DATE, END_DATE)
+  
+    var s2_cld_col_eval_disp = s2_cld_col_eval.map(add_cld_shdw_mask)
+  
+    display_cloud_layers(s2_cld_col_eval_disp)
+    
+    
+  } else {   // if running for real i.e. get median composite
+    
+    // Finally, apply to all images
+    
+    var s2_cld_col = get_s2_cld_col(AOI, START_DATE, END_DATE)
+    
+
+    // Function to apply the cloud mask to each image in the collection
+    function apply_cld_shdw_mask(img){
+      // Subset the cloudmask band and invert it so clouds/shadow are 0, else 1.
+      var not_cld_shdw = img.select('cloudmask').not()
+    
+      // Subset reflectance bands and update their masks, return the result.
+      return img.select('B.*').updateMask(not_cld_shdw)
+    }
+    
+    
+    // Process the collection
+    var s2_median = s2_cld_col.map(add_cld_shdw_mask)
+                              .map(apply_cld_shdw_mask)
+                              .median()
+                                 
+    Map.addLayer(s2_median,
+                {'bands': ['B4', 'B3', 'B2'], 'min': 0, 'max': 2500, 'gamma': 1.1},
+                 'S2 composite with s2_cloudless', true, 1)
+    
+    print('s2_median', s2_median)
+    
+
+    
+  }
+  
+
+  
+  
+}
+
+
+
+
+
+
+
+
+
+

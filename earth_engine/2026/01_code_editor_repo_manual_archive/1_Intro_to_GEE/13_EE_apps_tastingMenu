@@ -1,0 +1,175 @@
+/**
+ * EE Apps: Tasting Menu
+ *  
+ * A simple "sampler platter" for the Earth Engine Apps User Interface library.
+ * This example is composed of several simple widgets tied together, to give
+ * readers a sense of what components are available and how to wire them 
+ * together to make a simple application.
+ * 
+ * This app has several sections:
+ *   - declaring the widgets and nesting them in panels
+ *   - styling everything (individual widgets and panels)
+ *   - composing the styled subcomponents into the map
+ *   - defining behaviors (actions, callbacks, etc.)
+ * 
+ * @author Michael DeWitt (mdewitt@google.com)
+ */
+
+/**************
+ * Components *
+ **************/
+ 
+var rootPanel = ui.Panel();  // Highest-level container.
+var title = ui.Label("EE Apps: Tasting Menu");
+var controlPanel = ui.Panel();  // Controls.
+var mapPanel = ui.Panel();  // Maps!
+var outputPanel = ui.Panel();  // Results.
+
+// Configure the control panel.
+var label = ui.Label('Label text');
+var clickMeButton = ui.Button('Click me!');
+var resetButton = ui.Button('Reset text output');
+var checkbox = ui.Checkbox('Select!');
+var slider1 = ui.Slider();
+var slider2 = ui.Slider();
+var checkbox = ui.Checkbox('Select');
+var textbox = ui.Textbox('Enter text here...');
+var thumbnail = ui.Thumbnail();
+controlPanel.add(clickMeButton)
+  .add(resetButton)
+  .add(slider1)
+  .add(slider2)
+  .add(checkbox)
+  .add(textbox)
+  .add(thumbnail);
+
+// Configure the map panel.
+var standaloneMap = ui.Map();
+var leftMap = ui.Map();
+var rightMap = ui.Map();
+var splitMap = ui.SplitPanel(leftMap, rightMap, 'horizontal', true);
+mapPanel.add(standaloneMap)
+  .add(splitMap);
+
+// Configure the output panel.
+var chart = ui.Chart.array.values([[]], 'x');  // Empty for now.
+var textOutput = ui.Label('[text output]\n\r');
+outputPanel.add(chart)
+  .add(textOutput);
+
+/***********
+ * Styling *
+ ***********/
+ 
+title.style().set({
+  height: '10%',
+  width: '100%',
+  margin: 0,
+  textAlign: 'center',
+  fontSize: '24px',
+  backgroundColor: '444444',
+  color: 'white'
+});
+rootPanel.style().set({
+  height: '100%',
+  width: '100%'
+});
+controlPanel.style().set({
+  height: '90%',
+  width: '20%', 
+});
+slider1.style().set({
+  width: '100%',
+});
+slider2.style().set({
+  width: '100%',
+});
+textbox.style().set({
+  width: '96%'
+});
+thumbnail.setParams({
+  dimensions: 200,
+});
+
+mapPanel.style().set({
+  height: '90%',
+  width: '60%',
+});
+splitMap.style().set({
+  height: '50%',
+});
+outputPanel.style().set({
+  height: '90%',
+  width: '20%',
+  backgroundColor: 'white',
+});
+textOutput.style().set({
+  height: '42%',
+  margin: '3%',
+  padding: '12px',
+  width: '94%',
+  textAlign: 'center',
+  fontFamily: 'monospace',
+  backgroundColor: 'FFFFAA',
+});
+
+// Configure the layouts for how the panels flow together.
+ui.root.setLayout(ui.Panel.Layout.flow('vertical'))
+rootPanel.setLayout(ui.Panel.Layout.flow('horizontal'));
+
+/***************
+ * Composition *
+ ***************/
+ 
+ui.root.clear();
+ui.root.add(title);
+ui.root.add(rootPanel);
+rootPanel.add(controlPanel);
+rootPanel.add(mapPanel);
+rootPanel.add(outputPanel);
+
+/**********************
+ * Behaviors and data *
+ **********************/
+
+// Link our maps together.
+ui.Map.Linker([standaloneMap, leftMap, rightMap]);
+
+// A function to update the text in the text output box.
+function updateText(text) {
+  textOutput.setValue(textOutput.getValue() + ' ' + text);
+}
+
+// Make the button say "click".
+clickMeButton.onClick(function () {
+  updateText('click');
+  ui.url.set('clicked', true)
+});
+
+// The reset button clears the text.
+resetButton.onClick(function () { 
+  textOutput.setValue('');
+  ui.url.set({})
+});
+
+// One slider controls another.
+slider1.onChange(function(newValue) {
+  slider2.setValue(newValue / 2);
+});
+
+
+standaloneMap.drawingTools().onDraw(function (drawing) {
+  thumbnail.setImage(
+    ee.ImageCollection("LANDSAT/LC08/C01/T1_TOA")
+      .filterBounds(drawing)
+      .first()
+      .select([5, 4, 3])
+      .visualize());
+});
+
+// Add an image to a map.
+leftMap.addLayer(ee.Image('srtm90_v4'), {min: 0, max: 1000});
+
+// Make our chart show some simple data.
+//chart.setChartType('ScatterChart');
+chart.setDataTable([['x', 'y'], [3, 1], [4, 1], [5, 9], [2, 6], [5, 3]])

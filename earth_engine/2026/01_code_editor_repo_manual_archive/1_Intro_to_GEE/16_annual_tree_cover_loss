@@ -1,0 +1,83 @@
+// Annual tree cover loss in a polygon (or a set of polygons)
+
+/*
+Note, however, eventually annual maps will be updated based on tree height..
+https://www.globalforestwatch.org/blog/data-and-tools/whats-new-carbon-flux-monitoring/
+https://glad.umd.edu/dataset/GLCLUC2020
+
+https://developers.google.com/earth-engine/tutorials/tutorial_forest_03a
+*/
+
+
+
+// Load country boundaries from LSIB.
+var countries = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017');
+// Get a feature collection with just the Congo feature.
+var congo = countries.filter(ee.Filter.eq('country_co', 'CF'));
+
+// Get the loss image.
+// This dataset is updated yearly, so we get the latest version.
+var gfc = ee.Image("UMD/hansen/global_forest_change_2023_v1_11");
+var lossImage = gfc.select(['loss']);
+var lossAreaImage = lossImage.multiply(ee.Image.pixelArea());
+
+var lossYear = gfc.select(['lossyear']);
+var lossByYear = lossAreaImage.addBands(lossYear).reduceRegion({
+  reducer: ee.Reducer.sum().group({
+    groupField: 1
+    }),
+  geometry: congo,
+  scale: 30,
+  maxPixels: 1e9
+});
+print(lossByYear);
+
+
+
+// Print the result
+var statsFormatted = ee.List(lossByYear.get('groups'))
+  .map(function(el) {
+    var d = ee.Dictionary(el);
+    return [ee.Number(d.get('group')).format("20%02d"), d.get('sum')];
+  });
+var statsDictionary = ee.Dictionary(statsFormatted.flatten());
+print(statsDictionary);
+
+
+
+
+
+// Calculate class area
+
+// var classArea = ee.Image.pixelArea().addBands(classified)
+//       .reduceRegion({
+//         reducer: ee.Reducer.sum().group({
+//           groupField: 1,
+//           groupName: 'classification'
+//         }), 
+//         geometry: AOI, 
+//         scale: 30
+//       })
+      
+// print('classArea', classArea)
+
+
+
+
+/*
+
+#######################################
+Exercise
+#######################################
+
+Change the country to a large one, mask the Hansen tree cover loss layer to keep 
+only pixels with **percent tree cover in 2000 greater than 30%** 
+(`gfc.select('treecover2000').gt(30)`), 
+recompute the annual tree-cover loss area (hectares), and 
+**export** the result i.e. the per-year loss area table to Drive.
+
+
+*/
+
+
+

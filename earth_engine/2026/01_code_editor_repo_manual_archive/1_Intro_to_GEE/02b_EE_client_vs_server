@@ -1,0 +1,26 @@
+/*
+  Server vs Client
+  EE objects vs Javascript objects
+  EE methods vs Javascript methods
+  
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+
+var clientNumber = 10;
+
+var serverNumber = ee.Number(10);
+
+// Don't mix EE objects and JavaScript objects:
+var nonsense = serverNumber + 2;
+
+// You can print this, but it's not what you were hoping for.
+print('nonsense', nonsense);
+
+
+// Instead, use server-side function/method!
+var ok = serverNumber.add(2);
+print('ok', ok);

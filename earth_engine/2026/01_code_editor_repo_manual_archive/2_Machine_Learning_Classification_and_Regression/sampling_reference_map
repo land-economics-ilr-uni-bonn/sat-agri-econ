@@ -1,0 +1,249 @@
+
+var geometry = 
+    /* color: #d63000 */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[5.90407376400873, 51.179555353521245],
+          [5.90407376400873, 50.02207608047863],
+          [8.47487454525873, 50.02207608047863],
+          [8.47487454525873, 51.179555353521245]]], null, false);
+
+
+Map.centerObject(geometry);
+Map.setOptions('SATELLITE');
+
+
+var palettes = require('users/gena/packages:palettes');
+var viridis7Pal = palettes.matplotlib.viridis[7];
+
+
+
+////########################################################
+//// Sample training points from a percent tree cover map
+////########################################################
+
+var gfc = ee.Image("UMD/hansen/global_forest_change_2022_v1_10");
+
+
+var ref_trc_map = gfc.select("treecover2000");
+                  
+
+Map.addLayer(ref_trc_map.clip(geometry), {palette: viridis7Pal, min: 0, max: 100}, "ref_trc_map");
+ 
+ 
+var trc_samples = ref_trc_map.sample({
+  region: geometry, 
+  scale: 30, 
+  numPixels: 100, 
+  seed: 42, 
+  geometries: true
+});               
+
+
+print("trc_samples.limit(5)", trc_samples.limit(5));
+
+Map.addLayer(trc_samples, {color: 'orange'}, "trc_samples");
+
+
+print("trc_samples.aggregate_array('treecover2000')", 
+  trc_samples.aggregate_array('treecover2000'));
+
+                  
+                  
+                  
+                  
+////########################################################
+//// Sample training points from a land cover map
+////########################################################
+
+
+var esa_lc = ee.ImageCollection("ESA/WorldCover/v200");
+
+print("esa_lc", esa_lc);
+
+esa_lc = esa_lc.first().expression(
+    "(b('Map') == 10) ? 1" +
+    ": (b('Map') == 20) ? 2" +
+    ": (b('Map') == 30) ? 3" +
+    ": (b('Map') == 40) ? 4" +
+    ": (b('Map') == 50) ? 5" +
+    ": (b('Map') == 60) ? 6" +
+    ": (b('Map') == 70) ? 7" +
+    ": (b('Map') == 80) ? 8" +
+    ": (b('Map') == 90) ? 9" +
+    ": (b('Map') == 95) ? 10" +
+    ": (b('Map') == 100) ? 11" + ": 0"
+).rename('Map');
+
+///// same thing:
+
+// var esa_lc = ee.ImageCollection("ESA/WorldCover/v200").first().remap(
+//     [10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100],
+//     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+//     0,
+//     'Map'
+// )
+
+
+////-------------------------------------------------------
+//// Some stuff for map visualization
+
+var dict1 = { 
+"names": ['Tree cover (1)','Shrubland (2)','Grassland (3)','Cropland (4)','Built-up (5)','Bare / sparse vegetation (6)','Snow and ice (7)','Open water (8)','Herbaceous wetland (9)','Mangroves (10)','Moss and lichen (11)'],
+"colors": ['#358221','#EECFA8','#A7D282','f096ff','#ED022A','#EDE9E4','#F2FAFF','#1A5BAB','#87D19E','00cf75','#cef542']};
+
+
+// Create a panel to hold the legend widget
+var legend1 = ui.Panel({
+  style: {
+    position: 'bottom-right',
+    padding: '8px 15px'
+  }
+});
+
+// Add the legend to the map
+addCategoricalLegend(legend1, dict1, 'ESA WorldCover');
+
+
+// Add image to the map
+Map.addLayer(esa_lc.clip(geometry), {min:1, max:11, palette:dict1['colors']}, 'ESA WorldCover 10m (2021)', false);
+
+
+
+////-------------------------------------------------------
+//// Sample training points from the reference land cover map
+
+var lc_samples = esa_lc.stratifiedSample({
+  numPoints: 100, 
+  classBand: 'Map', 
+  region: geometry, 
+  scale: 10, 
+  seed: 42, 
+  geometries: true
+});
+
+
+
+print("lc_samples.limit(3)", lc_samples.limit(3));
+
+print("lc_samples.aggregate_histogram('Map')", 
+  lc_samples.aggregate_histogram('Map'));
+
+
+Map.addLayer(lc_samples, {color: 'cyan'}, "lc_samples", false);
+
+
+Export.table.toAsset({
+  collection: lc_samples, 
+  description: "samplesFromMapLc", 
+  assetId: 'users/hadicu06/tutorial_investment_and_finance/sandbox/samplesFromMapLc', 
+});
+
+
+
+
+
+
+///==========================================================================
+// FUNCTIONS
+///==========================================================================
+
+
+
+// Function to add legend
+// Adapted from https://code.earthengine.google.com/?accept_repo=users/smokepolicytool/public by author Tianjia Liu
+function discreteLegendMap(title, subtitle, labels, colPal) {
+  var discreteLegendPanel = ui.Panel({
+    style: {
+      padding: '0 9px 2px 9px',
+      position: 'bottom-left'
+    }
+  });
+   
+  var legendTitle = ui.Label(title, {fontWeight: 'bold', fontSize: '18.5px', margin: '6px 0 4px 0'});
+  discreteLegendPanel.add(legendTitle);
+  discreteLegendPanel.add(ui.Label(subtitle,{margin: '-6px 0 6px 8px'}));
+
+  
+  var makeRow = function(colPal, labels) {
+    var colorBox = ui.Label({
+      style: {
+        backgroundColor: colPal,
+        padding: '8px',
+        margin: '0 0 6px 0',
+        fontSize: '14px',
+      }
+    });
+
+    var description = ui.Label({value: labels, style: {margin: '0 0 4px 6px', fontSize: '13.5px'}});
+    return ui.Panel({widgets: [colorBox, description], layout: ui.Panel.Layout.Flow('horizontal')});
+  };
+  
+  for (var i = 0; i < labels.length; i++) {
+    discreteLegendPanel.add(makeRow(colPal[i], labels[i]));
+  }
+  return discreteLegendPanel;
+};
+
+
+
+// Another version (to be harmonized)
+
+function addCategoricalLegend(panel, dict, title) {
+  
+  // Create and add the legend title.
+  var legendTitle = ui.Label({
+    value: title,
+    style: {
+      fontWeight: 'bold',
+      fontSize: '18px',
+      margin: '0 0 4px 0',
+      padding: '0'
+    }
+  });
+  panel.add(legendTitle);
+  
+  var loading = ui.Label('Loading legend...', {margin: '2px 0 4px 0'});
+  panel.add(loading);
+  
+  // Creates and styles 1 row of the legend.
+  var makeRow = function(color, name) {
+    // Create the label that is actually the colored box.
+    var colorBox = ui.Label({
+      style: {
+        backgroundColor: color,
+        // Use padding to give the box height and width.
+        padding: '8px',
+        margin: '0 0 4px 0'
+      }
+    });
+  
+    // Create the label filled with the description text.
+    var description = ui.Label({
+      value: name,
+      style: {margin: '0 0 4px 6px'}
+    });
+  
+    return ui.Panel({
+      widgets: [colorBox, description],
+      layout: ui.Panel.Layout.Flow('horizontal')
+    });
+  };
+  
+  // Get the list of palette colors and class names from the image.
+  var palette = dict['colors'];
+  var names = dict['names'];
+  loading.style().set('shown', false);
+  
+  for (var i = 0; i < names.length; i++) {
+    panel.add(makeRow(palette[i], names[i]));
+  }
+  
+  Map.add(panel);
+  
+}

@@ -1,0 +1,255 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var hadi = /* color: #d63000 */ee.Geometry.Polygon(
+        [[[38.07697234332294, 9.01840891655024],
+          [38.10804305255146, 9.011118652896116],
+          [38.13156066119404, 9.020612920770875],
+          [38.11199126422138, 9.048077074209086],
+          [38.06873259722919, 9.038583529531088]]]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+
+
+var geometry = /* color: #d63000 */ee.Geometry.Point([104.74551156654312, -2.9714700800585607]);
+
+Map.centerObject(geometry, 10);
+  
+// Load Landsat-8 surface reflectance
+var L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2");
+
+print("L8.first()", L8.first())
+
+// Filter the Landsat image collection
+var filtered = L8.filterDate('2019-01-01', '2021-12-31')
+                 .filter('CLOUD_COVER_LAND < 50')
+                 .filterBounds(hadi);
+
+// Apply scaling and offset
+var applyScaleAndOffset = function(image) {
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+  var thermalBands = image.select('ST_B.*').multiply(0.00341802).add(149.0);
+  return image.addBands(opticalBands, null, true).addBands(thermalBands, null, true);
+};
+
+filtered = filtered.map(applyScaleAndOffset);
+
+
+
+// Mask non-clear pixels
+// see also https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat8-9-Collection2-Level2-Science-Product-Guide-v5.pdf
+
+// Create a function to mask clouds and shadows in an image
+// Bit 1: Dilated Cloud
+// Bit 2: Cirrus (high confidence)
+// Bit 3: Cloud
+// Bit 4: Cloud Shadow
+// Bit 5: Snow
+var maskClouds = function (image) {
+  var qa = image.select('QA_PIXEL');
+  var cloudShadowBitMask = 1 << 3;
+  var cloudBitMask = 1 << 4;
+  var cloudMask = qa.bitwiseAnd(cloudShadowBitMask).eq(0).and(qa.bitwiseAnd(cloudBitMask).eq(0));
+  return image.updateMask(cloudMask);
+};
+
+// Map the mask function to each image in the image collection
+var cloudMasked = filtered.map(maskClouds);
+
+
+// Create a median composite
+var composite = cloudMasked.median();
+
+print('composite', composite);
+
+Map.addLayer(composite, {min:0, max:0.2, bands:['SR_B4', 'SR_B3', 'SR_B2']}, 'Median composite');
+  
+
+
+// Keep only reflective bands
+var composite_refl = composite.select('SR_B.');
+
+print("composite_refl", composite_refl);
+
+
+
+// Scale value by 10000, cast data type to signed 16-bit integer, to minimize data storage
+var composite_refl_int = composite_refl.multiply(10000).round().toInt16();
+
+composite_refl_int = composite_refl_int.set('scaling_factor', 10000);
+
+print("composite_refl_int", composite_refl_int);
+
+
+
+// Export composite to EE Asset
+// Ctrl + '
+/*
+var AOI = ee.Geometry.Polygon(
+        [[104.22150533484776, -2.769972944870619],
+          [104.22150533484776, -3.1567224220927574],
+          [105.14023702430089, -3.1567224220927574],
+          [105.14023702430089, -2.769972944870619]]);
+*/
+          
+var AOI = hadi
+
+Map.addLayer(AOI, {}, "AOI");
+Map.centerObject(AOI)
+
+
+////########################################################
+//// Export an image to Asset
+////########################################################
+
+
+Export.image.toAsset({
+  image: composite_refl_int.set('script', '9ecbe69ae4d5428671117c5dccd872f7'), 
+  description: 'landsat_composite', 
+  assetId: 'users/hadicu06indo/tutorial_satAgEcon/landsat_composite', 
+  region: AOI,                 // smaller area
+  scale: 30,
+  crs: 'epsg:4326'
+});
+
+/*
+Took 5m
+*/
+
+
+////########################################################
+//// Export an image to Drive
+////########################################################
+
+
+Export.image.toDrive({
+  image: composite_refl_int, 
+  description: "landsat_composite_9ecbe69ae4d5428671117c5dccd872f7", 
+  folder: 'tutorial_satAgEcon', 
+  region: AOI, 
+  scale: 30,
+  crs: 'epsg:4326'
+});
+
+/*
+Took 4m
+*/
+
+
+/*
+https://developers.google.com/earth-engine/tutorials/community/beginners-cookbook
+by author TC Chakraborty
+
+Export.image.toDrive(), Export.image.toCloudStorage(),
+Export.table.toDrive(), Export.table.toCloudStorage(), Export.table.toAsset()
+*/
+
+
+
+
+
+////---------------------------------------------------------
+//// More controls
+////---------------------------------------------------------
+
+
+
+
+var proj = filtered.first().projection().getInfo();
+
+var crs = proj.crs;
+
+var scale = filtered.first().projection().nominalScale().getInfo();
+
+var transform = proj.transform;
+
+print("proj", proj);
+print("crs", crs);  
+print("scale", scale);  
+print("transform", transform);
+
+
+
+// Export.image.toDrive({
+//   image: composite_refl_int, 
+//   description: "landsat_composite_moreControls_", 
+//   folder: 'tutorial_satAgEcon', 
+//   region: AOI, 
+//   // scale: 30, 
+//   crs: crs, 
+//   crsTransform: transform, 
+//   maxPixels: 1e13, 
+//   fileFormat: 'GeoTIFF', 
+//   pyramidingPolicy: {'.default': 'mean'},
+//   formatOptions: {'cloudOptimized': true}
+// });
+
+
+
+
+////---------------------------------------------------------
+//// Sentinel-2, multitemporal composites
+////---------------------------------------------------------
+
+
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED');
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+
+
+var s2_seasons = ee.List.sequence(1, 12, 3).map(function(month) {
+  month = ee.Number(month)
+  var seasons = s2
+    .filterBounds(geometry)
+    .filterDate('2019-01-01', '2021-12-31')
+    .linkCollection(csPlus, ['cs'])
+    .map(function(img) {
+      return img.updateMask(img.select('cs').gte(0.60));
+    })
+    .filter(ee.Filter.calendarRange(month, month.add(2), 'month'))
+    .select('B.*')
+
+  // Create a composite from means at different polarizations and look angles.
+  var seasons_composites = seasons.mean()
+  return seasons_composites
+})
+
+var s2_seasons_composites = ee.ImageCollection.fromImages(s2_seasons).toBands()
+
+print("s2_seasons_composites", s2_seasons_composites)
+
+var old_names = s2_seasons_composites.bandNames();
+
+print("old_names", old_names);
+
+var new_names = old_names.map(function(name) {
+  return ee.String('season_').cat(name);
+});
+
+print("new_names", new_names);
+
+s2_seasons_composites = s2_seasons_composites.select(old_names, new_names);
+
+print("s2_seasons_composites", s2_seasons_composites)
+
+
+// Export.image.toAsset({
+//   image: s2_seasons_composites.set('script', '13668510f6152c6b7ddc0caacda2a4c4'), 
+//   description: 's2_seasons_composites', 
+//   assetId: 'users/hadicu06indo/tutorial_satAgEcon/s2_seasons_composites', 
+//   region: AOI,                 // smaller area
+//   scale: 10,
+//   crs: 'epsg:4326'
+// });
+
+
+
+/*
+Took 34m
+*/
+
+
+

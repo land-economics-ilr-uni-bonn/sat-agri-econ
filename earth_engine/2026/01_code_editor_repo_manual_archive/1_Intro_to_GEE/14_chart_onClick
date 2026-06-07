@@ -1,0 +1,294 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var geometry = /* color: #00ffff */ee.Geometry.Point([7.091642983067601, 50.71004746104385]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+ Adapted from scripts by authors: Noel Gorelick, David Gibson, and Nick Clinton
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+ https://code.earthengine.google.com/?accept_repo=users/nclinton/EE102
+*/
+
+
+
+Map.centerObject(geometry, 15);
+
+
+
+var params = {
+  startDate: '1984-01-01',
+  endDate: '2024-12-31'
+}
+
+
+////########################################################
+//// Chart on click
+////########################################################
+
+
+// Function to apply scaling factors
+
+function scaleL457sr(image) {
+  
+  // Apply the scaling factors to the appropriate bands.
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2)
+  // var thermalBand = image.select('ST_B6').multiply(0.00341802).add(149.0)
+  var thermalBand = image.select('ST_B.*').multiply(0.00341802).add(149.0)
+
+  
+  // Replace the original bands with the scaled ones
+  return image.addBands(opticalBands, null, true)
+      .addBands(thermalBand, null, true)
+      .copyProperties(image, ['system:time_start'])
+  
+}
+
+
+function scaleL8sr(image) {
+  
+  // Apply the scaling factors to the appropriate bands.
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2) 
+  var thermalBand = image.select('ST_B.*').multiply(0.00341802).add(149.0)
+  
+  // Replace the original bands with the scaled ones
+  return image.addBands(opticalBands, null, true)
+      .addBands(thermalBand, null, true)
+      .copyProperties(image, ['system:time_start'])
+  
+}
+
+
+
+// Cloud masking function for Landsat 4,5 and 7
+
+function maskL457sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(parseInt('11111', 2)).eq(0)
+  var saturationMask = image.select('QA_RADSAT').eq(0)
+
+  // Replace the original bands with the scaled ones and apply the masks.
+  return image
+      .updateMask(qaMask)
+      .updateMask(saturationMask)
+      .copyProperties(image, ['system:time_start'])
+}
+
+// Cloud masking function for Landsat 8
+function maskL8sr(image) {
+  var qaMask = image.select('QA_PIXEL').bitwiseAnd(parseInt('11111', 2)).eq(0)
+  var saturationMask = image.select('QA_RADSAT').eq(0)
+
+  // Replace the original bands with the scaled ones and apply the masks.
+  return image
+      .updateMask(qaMask)
+      .updateMask(saturationMask)
+      .copyProperties(image, ['system:time_start'])
+}
+
+
+// Function to add vegetation indices bands to an images
+
+function addOpticIndices(image) {
+
+    var ndvi = ee.Image(image).normalizedDifference(['nir', 'red']).rename('ndvi')
+    
+    var ndmi = ee.Image(image).normalizedDifference(['nir', 'swir1']).rename('ndmi')
+   
+    var evi = ee.Image(image).expression(
+      '2.5 * (NIR - R) / (NIR + 6*R - 7.5*B + 1)', {     /// "2.5 * ((NIR-RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))",
+        R: image.select('red'),        
+        NIR: image.select('nir'),     
+        B: image.select('blue')
+        
+      }).rename('evi')
+          
+    return ee.Image(image)
+          .addBands([ndvi, ndmi, evi])
+          // copyProperties?
+    
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////
+// Interlude: Intro to User Interface API
+
+// Create a panel to hold our widgets.
+var panel = ui.Panel();
+panel.style().set({
+    position: 'bottom-left',
+    height: '250px',
+    width: '400px',
+});
+// Add the panel to the ui.root.
+Map.add(panel);
+
+
+Map.onClick(function(coords) {
+
+  // Add a red dot for the point clicked on.
+  var point = ee.Geometry.Point(coords.lon, coords.lat);
+  var dot = ui.Map.Layer(point, {color: 'FF0000'}, 'Clicked point');
+  Map.layers().set(0, dot);
+
+  // Get and filter image collection at that point, calculate NDMI index
+  
+  var L5 = ee.ImageCollection("LANDSAT/LT05/C02/T1_L2");
+  var L7 = ee.ImageCollection("LANDSAT/LE07/C02/T1_L2");
+  var L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2");
+  var L9 = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2");
+
+    
+  // Mapping of band-names to a uniform naming scheme
+  var l5Bands = ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7']
+  var l5names = ['blue','green','red','nir','swir1','swir2']
+  
+  var l7Bands = ['SR_B1','SR_B2','SR_B3','SR_B4','SR_B5','SR_B7']
+  var l7names = ['blue','green','red','nir','swir1','swir2']
+  
+  var l8Bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7']
+  var l8names = ['blue','green','red','nir','swir1','swir2']
+
+  var l9Bands = ['SR_B2','SR_B3','SR_B4','SR_B5','SR_B6','SR_B7']
+  var l9names = ['blue','green','red','nir','swir1','swir2']
+  
+  
+
+  var l5filtered = L5
+      .filterDate(params.startDate, params.endDate)
+      .filterBounds(point)
+      .map(scaleL457sr)
+      .map(maskL457sr)
+      .select(l5Bands,l5names)
+      .map(addOpticIndices)
+
+  
+  var l7filtered = L7
+      .filterDate(params.startDate, params.endDate)
+      .filterBounds(point)
+      .map(scaleL457sr)
+      .map(maskL457sr)
+      .select(l7Bands,l7names)
+      .map(addOpticIndices)
+
+
+  var l8filtered = L8
+      .filterDate(params.startDate, params.endDate)
+      .filterBounds(point)
+      .map(scaleL457sr)
+      .map(maskL8sr)
+      .select(l8Bands,l8names)
+      .map(addOpticIndices)
+      
+      
+  // var l9filtered = L9
+  //     .filterDate(params.startDate, params.endDate)
+  //     .filterBounds(point)
+  //     .map(scaleL8sr)
+  //     .map(maskL8sr)
+  //     .select(l9Bands,l9names)
+  //     .map(addOpticIndices)
+      
+  var l_merged = l5filtered.merge(l7filtered).merge(l8filtered)
+  //.merge(l9filtered)
+  
+  print("l_merged", l_merged)
+  
+  
+  // Make time series chart of NDMI 
+  var tsChart = ui.Chart.image.series({
+    imageCollection: l_merged.select(['ndvi']), 
+    region: point, 
+    reducer: ee.Reducer.mean(),
+    scale: 30
+  });
+  
+  // Customize the chart
+  tsChart = tsChart
+  .setOptions({
+    title: 'Landsat time series',
+    pointSize: 3,
+    lineWidth: 0});
+   
+   
+  // Insert the chart widget into the panel          
+  panel.widgets().set(0, tsChart);
+  
+});
+
+
+// Chart data can be downloaded
+
+
+
+
+
+
+////########################################################
+//// Example dynamic display of map layer
+////########################################################
+
+
+
+var points = ee.FeatureCollection("users/hadicu06/tutorial_investment_and_finance/sandbox/samplesFromMapLc");
+
+
+points = points.map( function (ft) { return ft.set('Map_str', ee.Number(ft.get('Map')).format()) } );
+
+
+var labels = points.distinct('Map_str')
+                          .sort('n', false)
+                          .reduceColumns(ee.Reducer.toList(), ['Map_str'])
+                          .get('list');
+                          
+
+print("labels", labels);
+
+
+var config = {};
+
+config.selLabel = "1";
+
+
+var uiSelLabel = ui.Select({
+  
+    items: labels.getInfo(), 
+    
+    value: config.selLabel,
+    
+    onChange: function(value){
+      config.selLabel = value;
+      updatePoints();
+    },
+    
+    style: {'position': 'top-center'}
+  });
+
+Map.add(ui.Label('Select label:', {'position': 'bottom-center'})); 
+
+Map.add(uiSelLabel);  
+
+
+// Need to initialize the layer 
+var points_init = points
+        .filter(ee.Filter.eq('Map_str', config.selLabel));
+        
+Map.addLayer(points_init, {color:'yellow'}, "Selected samples (yellow)");
+
+
+function updatePoints(){
+  
+  var selPoints = points
+        .filter(ee.Filter.eq('Map_str', config.selLabel));
+        
+  Map.layers().set(0, ui.Map.Layer(selPoints, {color:'yellow'}, "Selected samples (yellow)"));
+  
+  
+}
+
+/*
+'Tree cover (1)','Shrubland (2)','Grassland (3)','Cropland (4)','Built-up (5)','Bare / sparse vegetation (6)',
+'Snow and ice (7)','Open water (8)','Herbaceous wetland (9)','Mangroves (10)','Moss and lichen (11)'
+*/
+
+Map.setOptions('HYBRID');

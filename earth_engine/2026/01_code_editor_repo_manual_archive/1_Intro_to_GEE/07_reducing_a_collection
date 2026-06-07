@@ -1,0 +1,150 @@
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+// var geometry = /* color: #d63000 */ee.Geometry.Point([104.74551156654312, -2.9714700800585607]);
+
+
+var geometry = 
+    /* color: #d63000 */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[5.930776243241445, 51.377992286302856],
+          [5.930776243241445, 50.20085485490513],
+          [8.353261594803945, 50.20085485490513],
+          [8.353261594803945, 51.377992286302856]]], null, false);
+
+Map.centerObject(geometry, 10);
+
+
+
+////########################################################
+//// Load an image collection
+////########################################################
+
+
+// Load Landsat-8 surface reflectance
+var L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2");
+
+// Filter by time and space
+var filtered = L8.filterDate('2019-01-01', '2019-12-31')
+                 .filter('CLOUD_COVER_LAND < 50')
+                 .filterBounds(geometry)
+                 .select('SR_B[1-7]');  // select optical bands
+
+print('filtered.size()', filtered.size());
+print('filtered.first()', filtered.first());
+
+
+// Apply scaling and offset
+function applyScaleAndOffset(image) {
+   return image.multiply(0.0000275).add(-0.2);
+}
+
+filtered = filtered.map(applyScaleAndOffset);
+
+Map.addLayer(filtered, {min:0, max:0.2, bands:['SR_B4', 'SR_B3', 'SR_B2']}, 'filtered', false);
+
+
+////########################################################
+//// Reduce an image collection
+////########################################################
+
+// Compute a median value for each pixel in the image
+var reduced = filtered.median();
+
+// other shortcut functions: product(), max(), min(), mean(), mode(), median(), count()
+
+// or: outputImage = imCollection.reduce(reducer);
+// reduced = filtered.reduce(ee.Reducer.median());
+
+print('reduced', reduced);
+
+Map.addLayer(reduced, {min:0, max:0.2, bands:['SR_B4', 'SR_B3', 'SR_B2']}, 'Median composite');
+
+
+
+
+
+////########################################################
+//// Example climate data
+////########################################################
+
+var terraClimate = ee.ImageCollection('IDAHO_EPSCOR/TERRACLIMATE')
+                  .filterBounds(geometry);
+                  
+print("terraClimate", terraClimate); // what's the temporal frequency? the temporal span?                 
+
+var tmax = terraClimate.select('tmmx');
+
+Map.addLayer(tmax, {}, "tmax", false);
+
+
+////----------------------------------------------
+//// Get annual mean tmax
+////----------------------------------------------
+
+/// Key design pattern: map a function over a list of years
+
+// List of years
+var years = ee.List.sequence(2000, 2023);
+
+
+// Function to be applied to a year parameter
+var calculateYearlyTmax = function(year) {
+  
+  var startDate = ee.Date.fromYMD(year, 1, 1);
+  
+  var endDate = startDate.advance(1, 'year');
+  
+  var filtered = tmax
+    .filter(ee.Filter.date(startDate, endDate));
+    
+  var reduced = filtered.reduce(ee.Reducer.mean());
+ 
+  return reduced.set('year', year);  // add 'year' property (metadata)
+  
+};
+
+
+
+// Map the function over the list of years, this returns a list.
+var yearlyTmax = years.map(calculateYearlyTmax);
+
+// Convert list of images into an image collection.
+yearlyTmax = ee.ImageCollection(yearlyTmax);
+
+print("yearlyTmax", yearlyTmax);
+
+
+// Get multiyear (all years) mean of the yearly means
+var multiyearsMean = yearlyTmax.reduce(ee.Reducer.mean());
+
+print("multiyearsMean", multiyearsMean);
+
+
+
+/*
+
+###################
+Exercise
+###################
+
+A. Compute the **annual sum of precipitation** from TerraClimate (`IDAHO_EPSCOR/TERRACLIMATE`, band `pr`): 
+filter one year, then reduce the collection with `ee.Reducer.sum()`. 
+Why is `sum` (not `mean`) the right reducer for an annual precipitation total?
+
+
+B. Compute the **annual mean of solar radiation during May–August** from TerraClimate (band `srad`): 
+filter to those months across one year (e.g. with `ee.Filter.calendarRange(5, 8, 'month')`), 
+then reduce with `ee.Reducer.mean()`.
+
+
+*/

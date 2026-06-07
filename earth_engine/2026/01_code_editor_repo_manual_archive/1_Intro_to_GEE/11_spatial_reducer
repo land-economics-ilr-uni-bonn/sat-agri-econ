@@ -1,0 +1,65 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var roi = /* color: #ffc82d */ee.Geometry.Polygon(
+        [[[121.68895970647716, -3.824997781163788],
+          [121.94164525335216, -3.75922413790803],
+          [122.11467992132091, -3.5200036118478675],
+          [122.04601537053966, -3.185494611305624],
+          [121.71093236272716, -3.0593394274968486],
+          [121.40606175725841, -3.1251614144391215],
+          [121.25654131975419, -3.2601365882071183],
+          [121.16865069475419, -3.495932065201353],
+          [121.16590411272294, -3.7097419315928803],
+          [121.57239825334794, -3.8659550640147686]]]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+// Load images by names
+var debtAGC = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_Biomass_tCPerHa_F")
+  .rename('Diff_Biomass_tCPerHa_F');
+
+var debtBGC = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_SOC")
+  .rename('Diff_SOC');
+
+var debtErosionWater = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_Water_erosion")
+  .rename('Diff_Water_erosion');
+
+var debtTreeCover = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_treeCover")
+  .rename('Diff_treeCover');
+
+
+
+
+// Compute mean of tree cover debt in roi
+// var outputDictionary = varImage.reduceRegion(reducer, geometry, scale);
+var stat = debtTreeCover.reduceRegion('mean', roi, 1000);
+print('stat', stat);  
+
+
+
+
+
+// All layers at once
+var multibands = ee.Image.cat([
+  debtAGC, debtBGC, debtErosionWater, debtTreeCover
+]);
+
+
+// // or
+// var multibands = debtAGC.addBands(debtBGC)
+//                 .addBands(debtErosionWater)
+//                 .addBands(debtTreeCover);
+  
+
+
+// Display the image on the map.
+Map.addLayer(multibands, {}, 'multibands', false);
+
+
+// Compute mean of all debt layers in aoi.
+var stats = multibands.reduceRegion('mean', roi, 1000);
+print('stats', stats);  

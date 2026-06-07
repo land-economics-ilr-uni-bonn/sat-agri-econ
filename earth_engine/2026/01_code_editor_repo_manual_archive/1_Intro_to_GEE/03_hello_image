@@ -1,0 +1,208 @@
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+
+////########################################################
+//// First look at an ee.Image
+////########################################################
+
+// Load an image by name.
+var srtm = ee.Image("USGS/SRTMGL1_003");
+print('srtm', srtm);
+
+// Display the image on the map.
+Map.addLayer(srtm, {min:0, max:3000}, 'srtm');
+
+
+// https://developers.google.com/earth-engine/image_visualization
+
+
+
+////########################################################
+//// Wuepper, Borrelli et al. degradation debt layers
+////########################################################
+
+
+// Example loading external module, here to get color palette for image visualization
+var palettes = require('users/gena/packages:palettes');
+
+var viridis7Pal = palettes.matplotlib.viridis[7];
+
+
+var debtAGC = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_Biomass_tCPerHa_F")
+  .rename('Diff_Biomass_tCPerHa_F');
+
+var debtBGC = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_SOC")
+  .rename('Diff_SOC');
+
+var debtErosionWater = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_Water_erosion")
+  .rename('Diff_Water_erosion');
+
+var debtTreeCover = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_treeCover")
+  .rename('Diff_treeCover');
+
+
+
+Map.addLayer(debtAGC, {palette: viridis7Pal}, 'debtAGC', false);
+
+Map.addLayer(debtBGC, {palette: viridis7Pal}, 'debtBGC', false);
+
+Map.addLayer(debtErosionWater, {palette: viridis7Pal}, 'debtErosionWater', false);
+
+Map.addLayer(debtTreeCover, {palette: viridis7Pal}, 'debtTreeCover', false);
+
+
+
+
+
+/*
+
+Try other datasets:
+
+https://glad.umd.edu/dataset/GLCLUC2020 
+
+https://data.globalforestwatch.org/datasets/6c080bd3e4044f688f8ae8a05cf0721a/about
+
+https://gee-community-catalog.org/
+
+
+New assets in data catalog (2024):
+https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_COMPOSITES_C02_T1_L2_ANNUAL_NDVI
+https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_COMPOSITES_C02_T1_L2_ANNUAL_EVI 
+https://developers.google.com/earth-engine/datasets/catalog/JRC_GFC2020_V1
+
+*/
+
+
+
+
+////########################################################
+//// Bonus: Visualizing categorical map, with legend
+////########################################################
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ESA WorldCover 10m v200, 2021
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+print("ee.ImageCollection('ESA/WorldCover/v200')", ee.ImageCollection('ESA/WorldCover/v200'));
+
+
+var esa_lc = ee.ImageCollection("ESA/WorldCover/v200").first().expression(
+    "(b('Map') == 10) ? 1" +
+    ": (b('Map') == 20) ? 2" +
+    ": (b('Map') == 30) ? 3" +
+    ": (b('Map') == 40) ? 4" +
+    ": (b('Map') == 50) ? 5" +
+    ": (b('Map') == 60) ? 6" +
+    ": (b('Map') == 70) ? 7" +
+    ": (b('Map') == 80) ? 8" +
+    ": (b('Map') == 90) ? 9" +
+    ": (b('Map') == 95) ? 10" +
+    ": (b('Map') == 100) ? 11" + ": 0"
+);
+
+///// same thing:
+
+// var esa_lc = ee.ImageCollection("ESA/WorldCover/v200").first().remap(
+//     [10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100],
+//     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+//     0,
+//     'Map'
+// )
+
+
+// Mask 0
+esa_lc = esa_lc.updateMask(esa_lc.neq(0))
+
+
+var dict1 = { // ESA WorldCover
+"names": ['Tree cover (1)','Shrubland (2)','Grassland (3)','Cropland (4)','Built-up (5)','Bare / sparse vegetation (6)','Snow and ice (7)','Open water (8)','Herbaceous wetland (9)','Mangroves (10)','Moss and lichen (11)'],
+"colors": ['#358221','#EECFA8','#A7D282','f096ff','#ED022A','#EDE9E4','#F2FAFF','#1A5BAB','#87D19E','00cf75','#cef542']};
+//"colors": ['#358221','ffbb22','ffff4c','f096ff',"#ED022A",'b4b4b4','f0f0f0','#1A5BAB','0096a0','00cf75','fae6a0']};
+
+
+// Create a panel to hold the legend widget
+var legend1 = ui.Panel({
+  style: {
+    position: 'bottom-right',
+    padding: '8px 15px'
+  }
+});
+
+// Add the legend to the map
+addCategoricalLegend(legend1, dict1, 'ESA 2020 WorldCover');
+
+
+// Add image to the map
+Map.addLayer(esa_lc, {min:1, max:11, palette:dict1['colors']}, 'ESA WorldCover 10m (2021)', false)
+
+
+
+
+
+//########################################################################################################################################
+// FUNCTIONS
+//########################################################################################################################################
+
+
+function addCategoricalLegend(panel, dict, title) {
+  
+  // Create and add the legend title.
+  var legendTitle = ui.Label({
+    value: title,
+    style: {
+      fontWeight: 'bold',
+      fontSize: '18px',
+      margin: '0 0 4px 0',
+      padding: '0'
+    }
+  });
+  panel.add(legendTitle);
+  
+  var loading = ui.Label('Loading legend...', {margin: '2px 0 4px 0'});
+  panel.add(loading);
+  
+  // Creates and styles 1 row of the legend.
+  var makeRow = function(color, name) {
+    // Create the label that is actually the colored box.
+    var colorBox = ui.Label({
+      style: {
+        backgroundColor: color,
+        // Use padding to give the box height and width.
+        padding: '8px',
+        margin: '0 0 4px 0'
+      }
+    });
+  
+    // Create the label filled with the description text.
+    var description = ui.Label({
+      value: name,
+      style: {margin: '0 0 4px 6px'}
+    });
+  
+    return ui.Panel({
+      widgets: [colorBox, description],
+      layout: ui.Panel.Layout.Flow('horizontal')
+    });
+  };
+  
+  // Get the list of palette colors and class names from the image.
+  var palette = dict['colors'];
+  var names = dict['names'];
+  loading.style().set('shown', false);
+  
+  for (var i = 0; i < names.length; i++) {
+    panel.add(makeRow(palette[i], names[i]));
+  }
+  
+  Map.add(panel);
+  
+}
+

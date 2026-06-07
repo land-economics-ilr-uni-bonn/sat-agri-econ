@@ -1,0 +1,113 @@
+//---------------------------------------------------------
+// Geometry
+//---------------------------------------------------------
+var point = ee.Geometry.Point([106.84513, -6.21462]);
+
+var polygon = ee.Geometry.Polygon(
+        [ [93.2751654220357, 7.804963555807329],
+          [93.2751654220357, -11.73149827303028],
+          [143.32887635953568, -11.73149827303028],
+          [143.32887635953568, 7.804963555807329] ])
+
+Map.addLayer(polygon, {}, 'polygon')
+Map.centerObject(polygon)
+
+//---------------------------------------------------------
+// Feature
+//---------------------------------------------------------
+// Create a Feature from the Geometry
+// var feat = ee.Feature(geometry, properties);
+
+var dict = {name: 'Indonesia', pop: 270000000};
+var polyFeature = ee.Feature(polygon, dict);
+print('polyFeature', polyFeature)
+
+// Create a null geometry feature with the dictionary of properties.
+var nowhereFeature = ee.Feature(null, dict);
+print('nowhereFeature', nowhereFeature)
+
+// Get a property from the feature.
+var name_property = polyFeature.get('name');
+print('name_property', name_property);
+
+// Set a new property.
+polyFeature = polyFeature.set('capital', 'Jakarta');
+print('polyFeature with new property', polyFeature)
+
+
+
+//---------------------------------------------------------
+// Feature collection
+//---------------------------------------------------------
+// Make a list of Features.
+var features = [
+  polyFeature,
+  ee.Feature(ee.Geometry.Point([106.84513, -6.21462]), {name: 'Jakarta'})
+];
+
+// Create a FeatureCollection from the list and print it.
+var feature_col = ee.FeatureCollection(features);
+print('feature_col', feature_col);
+
+
+
+
+//---------------------------------------------------------
+// Visualize
+//---------------------------------------------------------
+var admin = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level1")
+           .filterMetadata('ADM0_NAME', 'equals', 'Indonesia')
+// or
+//.filter(ee.Filter.eq('ADM0_NAME', 'Indonesia'))
+
+print('admin', admin)
+
+Map.addLayer(admin, {}, 'default display');
+Map.addLayer(admin, {color: 'FF0000'}, 'colored');
+
+// Create an empty image into which to paint the features, cast to byte.
+var empty = ee.Image().byte();
+
+// Paint all the polygon edges with the same number and width, display.
+var outline = empty.paint({
+  featureCollection: admin,
+  color: 1,
+  width: 3
+});
+Map.addLayer(outline, {palette: 'FF0000'}, 'edges');
+ 
+
+//---------------------------------------------------------
+// Mapping over feature collection
+//---------------------------------------------------------
+// This function computes the feature's geometry area and adds it as a property.
+var addArea = function(feature) {
+  var area = feature.geometry().area()
+  return feature.set('AREA', area);
+};
+
+// Map the area getting function over the FeatureCollection.
+var areaAdded = admin.map(addArea);
+print('First feature:', areaAdded.first());
+print('First three features:', areaAdded.limit(3));
+
+
+
+// Demo: make buffer for each feature
+
+
+
+
+/*
+
+#########################
+Exercise
+#########################
+
+Extract the administrative level-1 and level-2 boundaries that contain Bonn, Germany, 
+from `ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level2")` 
+(filter by `ADM0_NAME`, `ADM1_NAME`, `ADM2_NAME`, or by a point in Bonn with `filterBounds`). 
+Display them and print the matched feature's properties.
+
+
+*/

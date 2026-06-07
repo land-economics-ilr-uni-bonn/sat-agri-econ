@@ -1,0 +1,125 @@
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+var geometry = 
+    /* color: #98ff00 */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[104.15638572682397, -2.777906388552432],
+          [104.15638572682397, -3.2194995010696426],
+          [105.09297019948022, -3.2194995010696426],
+          [105.09297019948022, -2.777906388552432]]], null, false);
+          
+Map.centerObject(geometry);
+
+
+
+////########################################################
+//// Load image collection
+////########################################################
+
+
+// Load Landsat-8 surface reflectance
+var L8 = ee.ImageCollection("LANDSAT/LC08/C02/T1_L2");
+
+// Filter by time, space, and metadata
+var filtered = L8.filterDate('2019-01-01', '2019-12-31')
+                 .filter('CLOUD_COVER_LAND < 50')
+                 .filterBounds(geometry)
+                 .select('SR_B.*');
+                 
+print('filtered', filtered);
+
+
+// How many images in the collection?
+print('filtered.size()', filtered.size());
+
+
+
+////########################################################
+//// Intermezzo
+////########################################################
+
+
+// Processing specific to Landsat Collection 2
+// Apply scaling and offset
+function unscaleRefl(img){
+  var scale = ee.Number(0.0000275);
+  var offset = ee.Number(-0.2);
+  var value_scaled = img.multiply(scale).add(offset);
+  return value_scaled.copyProperties(img, img.propertyNames());
+}
+
+
+filtered = filtered.map(unscaleRefl);
+
+
+////########################################################
+//// Map a function over an image collection
+////########################################################
+
+
+// Create function to calculate NDVI on an image, and add the NDVI band to the input image.
+/*
+
+// Defining the function
+function functionName(Arguments) {
+  statements;
+};
+
+// Calling the function and applying it on one element
+var result = functionName(input);
+
+
+// Mapping a function over a collection
+var result = input.map(functionName);
+
+*/
+
+
+function addNDVI(image) {
+  var ndvi = image.normalizedDifference(['SR_B5', 'SR_B4']);  // NIR, Red
+  return image.addBands(ndvi);
+}
+
+// Map the function over the image collection
+var with_ndvi = filtered.map(addNDVI);  // Add NDVI to every image
+
+print('with_ndvi', with_ndvi);
+
+// Click on the map to inspect the time series of NDVI in Inspector tab
+Map.addLayer(with_ndvi.select(['nd']), {}, "with_ndvi.select(['nd'])", false);
+
+
+// Sort the image collection by ascending cloud cover
+var sorted = with_ndvi.sort('CLOUD_COVER_LAND', true);
+
+// Show the NDVI of the least-cloudy image
+Map.addLayer(sorted.first().select(['nd']), {}, "sorted.first().select(['nd'])");
+
+
+
+/*
+
+######################
+Exercise
+######################
+
+
+
+*/
+
+
+
+
+
+
+

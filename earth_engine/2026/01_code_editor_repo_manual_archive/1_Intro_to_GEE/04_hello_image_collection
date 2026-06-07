@@ -1,0 +1,77 @@
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+// Load Sentinel-2 satellite images, surface reflectance product
+// var S2 = ee.ImageCollection("COPERNICUS/S2_SR");
+var S2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED");
+
+// Filter for images for one day
+// var selectedIm = imCollection.filterDate(startDate, stopDate);
+var filtered = S2.filterDate('2023-08-01', '2023-08-02');
+
+print('filtered', filtered);
+print('filtered.size()', filtered.size());
+print('filtered.first()', filtered.first());
+
+
+// Visualize the image on the map. First, as RGB.
+var rgb_vis = {
+  min: 0,
+  max: 3000,
+  bands: ['B4', 'B3', 'B2'] // Red, Green, Blue
+};
+
+Map.addLayer(filtered, rgb_vis, 'RGB', true);
+
+// Add a false-color visualization. Band B11 is Shortware Infrared 1. Band B8 is Near Infrared.
+Map.addLayer(filtered, 
+      {min: [0, 0, 0], 
+       max: [4000, 6000, 3000], 
+       bands: ['B11', 'B8', 'B4']}, 
+      'False Color',
+      false);
+
+
+/* Other filters
+https://developers.google.com/earth-engine/tutorials/community/beginners-cookbook
+by author TC Chakraborty
+
+ee.Filter.eq(propertyName, value) // or .neq , .gt , .gte , .lt , and .lte
+ee.Filter.stringContains(propertyName, stringValue) // or .stringStartsWith, and .stringEndsWith
+ee.Filter.rangeContains(propertyName, stringValue, minValue, maxValue)
+ee.Filter.listContains(propertyName, value1, propertyName2, value2)
+ee.Filter.calendarRange(startDate, stopDate)
+ee.Filter.dayOfYear(startDay, stopDay)
+ee.Filter.and(listOfFilters)
+ee.Filter.or(listOfFilters)
+ee.Filter.not(filter)
+*/
+
+
+
+
+/*
+
+#############
+Exercise
+#############
+Open the GEE Community Catalog NPK fertiliser dataset (https://gee-community-catalog.org/projects/npk), 
+copy its sample code, change the crop, and inspect the resulting map. 
+To see which crops are available, list them with 
+`collection.distinct('crop').aggregate_array('crop')`.
+
+
+#######################
+Try other datasets:
+#######################
+https://glad.umd.edu/dataset/GLCLUC2020 
+
+https://data.globalforestwatch.org/datasets/6c080bd3e4044f688f8ae8a05cf0721a/about
+
+https://gee-community-catalog.org/
+
+*/

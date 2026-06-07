@@ -1,0 +1,179 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var geometry = 
+    /* color: #d63000 */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[5.90407376400873, 51.179555353521245],
+          [5.90407376400873, 50.02207608047863],
+          [8.47487454525873, 50.02207608047863],
+          [8.47487454525873, 51.179555353521245]]], null, false);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+
+
+Map.centerObject(geometry);
+Map.setOptions('HYBRID');
+
+var palettes = require('users/gena/packages:palettes');
+
+var viridis7Pal = palettes.matplotlib.viridis[7];
+
+
+
+////########################################################
+//// Predictors / covariates / features
+////########################################################
+
+
+var isric_sand = ee.Image("projects/soilgrids-isric/sand_mean");
+var isric_soc = ee.Image("projects/soilgrids-isric/soc_mean");
+var precipitation = ee.Image("users/hadicu06/tutorial_investment_and_finance/sandbox/wc2_1_30s_prec_yearSum");
+var temperature = ee.Image("users/hadicu06/tutorial_investment_and_finance/sandbox/wc2_1_30s_tavg_yearMean");
+var elevation = ee.Image("USGS/GMTED2010");  
+
+
+isric_sand = isric_sand.reduce(ee.Reducer.mean());
+isric_soc = isric_soc.reduce(ee.Reducer.mean());
+
+
+////########################################################
+//// Training data
+////########################################################
+
+
+var reference_fc = ee.FeatureCollection("users/hadicu06/tutorial_investment_and_finance/sandbox/bastin_sm_data_s1");
+
+Map.addLayer(reference_fc, {color: 'yellow'}, "reference_fc");
+
+
+var stats = reference_fc.aggregate_stats('trc2015');
+
+print("stats", stats);
+
+
+////########################################################
+//// Extract features at training points
+////########################################################
+
+var covariates = ee.Image.cat([
+  isric_sand.rename('sand'),
+  isric_soc.rename('soc'),
+  precipitation.rename('precipitation'),
+  temperature.rename('temperature'),
+  elevation.rename('elevation')
+]);
+
+print("covariates", covariates);
+
+
+var sampleWithCovariates = covariates.sampleRegions({
+  collection: reference_fc, 
+  scale: 1000, 
+  geometries: true
+});
+
+
+print("sampleWithCovariates.limit(3)", sampleWithCovariates.limit(3));
+
+
+////########################################################
+//// Training set and validation set
+////########################################################
+
+
+sampleWithCovariates = sampleWithCovariates.randomColumn({ seed: 1 });
+
+var training = sampleWithCovariates.filter(ee.Filter.lt('random', 0.7));
+
+var validation = sampleWithCovariates.filter(ee.Filter.gte('random', 0.7));
+
+print("training.size()", training.size());
+
+print("validation.size()", validation.size());
+
+
+////########################################################
+//// Insantiate and train the ML model
+////########################################################
+
+var regressor = ee.Classifier.smileRandomForest(20)
+    .setOutputMode('REGRESSION');                              // !
+    
+    
+var trained = regressor.train({
+      features: training, 
+      classProperty: 'trc2015', 
+      inputProperties: covariates.bandNames()
+    });
+
+
+
+////########################################################
+//// Apply the classifier the whole image in AOI
+////########################################################
+
+
+var image_predicted = covariates.clip(geometry).classify(trained);
+
+Map.addLayer(image_predicted, {palette: viridis7Pal, min: 0, max: 100}, "image_predicted");
+
+
+////########################################################
+//// Predict the validation set
+////########################################################
+
+var validation_predicted = validation.classify(trained, "predicted");
+
+print("validation_predicted.limit(3)", validation_predicted.limit(3));
+
+
+
+////########################################################
+//// Accuracy (work-in-progress)
+////########################################################
+ 
+var val_extracted = validation_predicted.reduceColumns(ee.Reducer.toList(2),
+      ['trc2015', 'predicted']).get('list');
+var ref = ee.Array(val_extracted).transpose().cut([0,-1]).project([1]);
+var pred = ee.Array(val_extracted).transpose().cut([1,-1]).project([1]);
+
+var RMSD = calc_RMSD(ref, pred);
+var rSq = calc_rSq(ref, pred);
+
+print('RMSD', RMSD);
+print('rSq', rSq);
+
+
+
+///==========================================================================
+// FUNCTIONS
+///==========================================================================
+
+
+function calc_RMSD(x, y) {
+  var RMSD = x.subtract(y).pow(2).reduce('mean', [0]).sqrt()
+  return RMSD
+}
+
+
+function calc_rSq(x, y) {
+  // Calculate the terms
+  var n = x.length()
+  var sigma_x = x.reduce('sum', [0])
+  var sigma_y = y.reduce('sum', [0])
+  var sigma_xy = x.multiply(y).reduce('sum', [0])
+  var sigma_xSq = x.pow(2).reduce('sum', [0])
+  var sigma_ySq = y.pow(2).reduce('sum', [0])
+  // Calculate numerator and denominator of the R-squared formula
+  var numerator = n.multiply(sigma_xy).subtract(sigma_x.multiply(sigma_y))
+  var denominator = (n.multiply(sigma_xSq).subtract(sigma_x.pow(2)).multiply(n.multiply(sigma_ySq).subtract(sigma_y.pow(2)))).sqrt()
+  // Finally, calculate R-squared
+  var rSq = (numerator.divide(denominator)).pow(2)
+  return rSq;
+}
+
+

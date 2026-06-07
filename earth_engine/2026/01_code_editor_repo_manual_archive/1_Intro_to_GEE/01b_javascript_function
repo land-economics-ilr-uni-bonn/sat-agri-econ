@@ -1,0 +1,55 @@
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+// Normalized difference between two numbers a and b is (a - b) / (a + b)
+
+// Calculate normalized difference between 20 and 50
+var res = (20 - 50) / (20 + 50);
+print(res);
+
+// How about between 30 and 60?
+var res = (30 - 60) / (30 + 60);
+print(res);
+
+// How about between 100 and 200?
+
+
+
+
+/* Functions can be defined as a way to reuse code and make it easier to read.
+
+// Define a function
+function functionName(Arguments) {
+  statements;
+};
+
+// Calling the function
+var result = functionName(input);
+
+*/
+
+
+// function normalizedDifference(a, b) {
+//  return ((a - b) / (a + b));
+//};
+
+var normalizedDifference = function (a, b) {
+  var res = ((a - b) / (a + b));
+  return res;
+}
+
+
+// Normalized difference between 20 and 50
+var res = normalizedDifference(20, 50);
+print(res);
+
+// How about between 30 and 60?
+var res = normalizedDifference(30, 60);
+print(res);
+
+
+

@@ -1,0 +1,151 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var geometry = 
+    /* color: #98ff00 */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[104.15638572682397, -2.777906388552432],
+          [104.15638572682397, -3.2194995010696426],
+          [105.09297019948022, -3.2194995010696426],
+          [105.09297019948022, -2.777906388552432]]], null, false);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+Map.centerObject(geometry);
+
+
+
+////########################################################
+//// Example satellite data
+////########################################################
+
+
+// Load Sentinel-2 surface reflectance
+// var S2 = ee.ImageCollection("COPERNICUS/S2_SR");
+var S2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED");
+
+
+// Filter by time and space
+// var selectedIm = imCollection.filterDate(startDate, stopDate);
+// var selectedIm = imCollection.filterBounds(geometry);
+var filtered = S2.filterDate('2023-01-01', '2023-12-31')
+                 .filterBounds(geometry);
+
+                 
+print('filtered', filtered);
+
+// How many images are in the collection?
+print('filtered.size()', filtered.size());
+
+
+// Get image(s) with minimum cloud cover
+// Filter by metadata
+var lessCloudy = filtered.filterMetadata('CLOUDY_PIXEL_OVER_LAND_PERCENTAGE', 'less_than', 20);
+print('lessCloudy.size()', lessCloudy.size());
+print('lessCloudy', lessCloudy);
+
+// Get the first image in the less-cloudy image collection
+var image = lessCloudy.first();
+print('image', image);
+
+Map.addLayer(image, {min: 0, max: 3000, bands: ['B4', 'B3', 'B2']}, 'image');
+
+
+
+////########################################################
+//// Calculate vegetation indices
+////########################################################
+
+// Compute simple ratio vegetation index SR = nir / red = (B8 / B4)
+// var band = image.select(bandName);
+
+var sr = image.select('B8')
+         .divide(
+           image.select('B4')
+          );
+
+Map.addLayer(sr, {min:0, max:20}, 'SR');
+
+/*
+Other math functions:
+.subtract , .multiply, .max , .min , .abs , .round , .floor , .ceil , .sqrt , .exp, .log, .log10, .sin , .cos , .tan , .sinh , .cosh , .tanh , .acos, .asin
+*/
+
+
+
+// Compute NDVI = (nir - red) / (nir + red) = (B8 - B4) / (B8 + B4) 
+
+var ndvi = image.normalizedDifference(['B8', 'B4']);
+print('ndvi', ndvi);
+Map.addLayer(ndvi, {min: 0, max: 1}, 'ndvi');
+
+
+
+// Alternatively, using expression for band math
+var ndvi2 = image.expression(
+  '(nir - red) / (nir + red)', {
+    'nir': image.select('B8'), 
+    'red': image.select('B4')  
+  }
+);
+
+
+Map.addLayer(ndvi2, {min:0, max:1}, 'ndvi2');
+
+
+
+
+
+
+////########################################################
+//// Example environmental data
+////########################################################
+
+// https://gee-community-catalog.org/
+
+// Soil nitrogen
+
+var isric_nitrogen = ee.Image("projects/soilgrids-isric/nitrogen_mean");
+
+print("isric_nitrogen: ", isric_nitrogen);
+
+Map.addLayer(isric_nitrogen, {}, "isric_nitrogen", false);
+
+
+// Per-pixel mean, across bands in an image.
+
+var bands = ["nitrogen_0-5cm_mean", "nitrogen_5-15cm_mean", "nitrogen_15-30cm_mean"];
+
+var averaged = isric_nitrogen.select(bands).reduce(ee.Reducer.mean());
+
+Map.addLayer(averaged, {}, "averaged");
+
+
+
+
+/* Other filters
+https://developers.google.com/earth-engine/tutorials/community/beginners-cookbook
+by author TC Chakraborty
+
+Operators for filterMetadata include:
+"equals", "less_than", "greater_than", "not_equals", "not_less_than", "not_greater_than", "starts_with", "ends_with", "not_starts_with", "not_ends_with", "contains", "not_contains".
+
+ee.Filter.eq(propertyName, value) // or .neq , .gt , .gte , .lt , and .lte
+ee.Filter.stringContains(propertyName, stringValue) // or .stringStartsWith, and .stringEndsWith
+ee.Filter.rangeContains(propertyName, stringValue, minValue, maxValue)
+ee.Filter.listContains(propertyName, value1, propertyName2, value2)
+ee.Filter.calendarRange(startDate, stopDate)
+ee.Filter.dayOfYear(startDay, stopDay)
+ee.Filter.and(listOfFilters)
+ee.Filter.or(listOfFilters)
+ee.Filter.not(filter)
+*/

@@ -1,0 +1,50 @@
+/*
+ All the javascript you need to know (almost)
+ 
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+
+// Line comments start with two forward slashes. Like this line.
+
+/* Multi line comments start with a forward slash and a star,
+and end with a star and a forward slash. */
+
+// Statements should end in a semi-colon, or the editor complains with i "Missing semicolon".
+var test = 'I feel incomplete...'
+
+// Variables are used to store objects, and are defined using the keyword var.
+var the_answer = 42;
+
+// String objects start and end with a single quote.
+var my_variable = 'I am a string';
+
+// Parentheses are used to pass parameters to functions, here function named "print" which will print in console.
+print('This string will print in the Console tab.');
+
+// Square brackets are used to define lists.
+var my_list = ['mit', 'karte', 'bitte'];
+
+// The square brackets are also used for selecting items within a list.  
+print('my_list[1]', my_list[1]);
+// Javascript indexing starts from 0
+
+// Curly brackets (or braces) can be used to define dictionaries
+// (key:value pairs).
+var my_dict = {
+               'food':'bread', 
+               'color':'red', 
+               'number':42
+              };
+
+// Square brackets can be used to access dictionary items by key.
+print("my_dict['color']", my_dict['color']);
+
+//Or you can use the dot notation to get the same result.
+print('my_dict.color', my_dict.color);
+
+// Print whole dictionary
+print(my_dict);

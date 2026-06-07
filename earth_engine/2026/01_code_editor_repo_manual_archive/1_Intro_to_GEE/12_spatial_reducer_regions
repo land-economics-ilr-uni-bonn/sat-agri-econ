@@ -1,0 +1,184 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var roi = /* color: #ffc82d */ee.Geometry.Polygon(
+        [[[121.68895970647716, -3.824997781163788],
+          [121.94164525335216, -3.75922413790803],
+          [122.11467992132091, -3.5200036118478675],
+          [122.04601537053966, -3.185494611305624],
+          [121.71093236272716, -3.0593394274968486],
+          [121.40606175725841, -3.1251614144391215],
+          [121.25654131975419, -3.2601365882071183],
+          [121.16865069475419, -3.495932065201353],
+          [121.16590411272294, -3.7097419315928803],
+          [121.57239825334794, -3.8659550640147686]]]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+/*
+ Adapted from scripts by authors: Noel Gorelick and David Gibson
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101
+ https://code.earthengine.google.com/?accept_repo=users/gorelick/EE101-B
+ https://code.earthengine.google.com/?accept_repo=users/dag/ee101
+*/
+
+
+////########################################################
+//// Part 1
+////########################################################
+
+
+// Load images by names
+var debtAGC = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_Biomass_tCPerHa_F")
+  .rename('Diff_Biomass_tCPerHa_F');
+
+var debtBGC = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_SOC")
+  .rename('Diff_SOC');
+
+var debtErosionWater = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_Water_erosion")
+  .rename('Diff_Water_erosion');
+
+var debtTreeCover = ee.Image("users/hadicu06/Postdoc_Bonn/landDegradationDebt/wuepperBorrelli2021GCB/nativeResolution/Diff_treeCover")
+  .rename('Diff_treeCover');
+  
+  
+
+
+// Compute mean elevation within multiple regions, separately
+var country = ee.FeatureCollection("FAO/GAUL_SIMPLIFIED_500m/2015/level1")
+           .filterMetadata('ADM0_NAME', 'equals', 'Indonesia');
+
+// var outputDictionary = reduceColumns(reducer, selectors);
+print(country.reduceColumns(ee.Reducer.toList(), ['ADM1_NAME']));
+
+var javaFilter = ee.Filter.stringContains('ADM1_NAME', 'Jawa');
+var selProvs = country.filter(javaFilter);
+
+print('selProvs', selProvs);
+
+
+Map.centerObject(selProvs);
+Map.addLayer(debtTreeCover.clip(selProvs), {}, "debtTreeCover");
+Map.addLayer(ee.Image().byte().paint(selProvs, 1, 2), {palette:'cyan'}, 'Selected provinces');
+
+
+//var outputCollection = varImage.reduceRegions(collection, reducer, scale);
+var statByRegion = debtTreeCover.reduceRegions({
+  reducer: ee.Reducer.mean(), 
+  collection: selProvs,
+  scale: 1000
+});
+
+print('statByRegion', statByRegion);
+
+
+// Multiple reducers
+var statsByRegion = debtTreeCover.reduceRegions({
+  reducer: ee.Reducer.mean().combine(ee.Reducer.stdDev(), null, true), 
+  collection: selProvs,
+  scale: 1000
+});
+
+print('statsByRegion', statsByRegion);
+
+
+
+Export.table.toDrive({
+  collection: statsByRegion, 
+  description: 'statsByRegion_3c061412ecb7da8047acb1350711634a', 
+  folder: 'tutorial_satAgEcon', 
+  fileFormat: 'CSV',  // 'SHP' 
+  selectors: ['ADM1_NAME', 'mean', 'stdDev']
+});
+
+
+
+////########################################################
+//// Part 2. Example annual panel data, by region
+//// i.e. aggregate (reduction) over space and time
+////########################################################
+
+
+var terraClimate = ee.ImageCollection('IDAHO_EPSCOR/TERRACLIMATE')
+                  .filterBounds(selProvs);
+
+var tmax = terraClimate.select('tmmx');
+
+
+var calculateYearlyMeanTmaxByRegion = function(year) {
+  
+  var startDate = ee.Date.fromYMD(year, 1, 1);
+  
+  var endDate = startDate.advance(1, 'year');
+  
+  var filtered = tmax
+    .filter(ee.Filter.date(startDate, endDate));
+    
+  var reduced = filtered.reduce(ee.Reducer.mean());
+  
+  var meanByRegion = selProvs.map(function(feature) {
+    
+    var regionMean = reduced
+      .reduceRegion({
+        reducer: ee.Reducer.mean(),
+        geometry: feature.geometry(),
+        scale: 5000,
+        maxPixels: 1e10
+      });
+
+
+    return ee.Feature(feature.geometry(),
+      regionMean.set('regionName', feature.get('ADM1_NAME'))
+        .set('year', ee.Number(year).format('%d')));
+  });
+  
+  return meanByRegion;
+  
+};
+
+
+
+var years = ee.List.sequence(2000, 2023);
+
+var results = years.map(calculateYearlyMeanTmaxByRegion);
+
+results = ee.FeatureCollection(results).flatten();
+
+print("results", results);
+
+
+
+Export.table.toAsset({
+  collection: results, 
+  description: 'panel_data_3c061412ecb7da8047acb1350711634a', 
+  assetId: 'users/hadicu06indo/tutorial_satAgEcon/panel_data_3c061412ecb7da8047acb1350711634a'
+});
+
+
+
+Export.table.toDrive({
+  collection: results, 
+  description: 'panel_data_3c061412ecb7da8047acb1350711634a', 
+  folder: 'tutorial_satAgEcon', 
+  fileFormat: 'CSV',  // 'SHP' 
+  // selectors
+});
+
+/*
+Took 1m
+*/
+
+
+
+/*
+
+#####################################
+Exercise
+#####################################
+
+Draw a small region on the map, load the protected areas within it from 
+`ee.FeatureCollection("WCMC/WDPA/current/polygons")` (choose relatively small polygons), 
+then extract **annual biomass per protected-area polygon** using `reduceRegions` over 
+CTREES biomass data (https://gee-community-catalog.org/projects/ctrees_global/). 
+One row per protected area is your analysis-ready table.
+
+
+*/
+
+
