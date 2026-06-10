@@ -1,9 +1,9 @@
 ---
 title: "**Mapping tea plantations at the foot of Mount Kenya**"
 subtitle: |
-  **Supervised Machine Learning**
+  **Supervised Machine Learning Tutorial**
 
-  _[Land Economics Group, University of Bonn, Bonn, Germany](https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics)_
+  _[Land Economics Group, Institute for Food and Resource Economics, University of Bonn, Bonn, Germany](https://www.ilr1.uni-bonn.de/en/research/research-groups/land-economics)_
 author: "David Wuepper, Lisa Biber-Freudenberger, Hadi, Wyclife Agumba Oluoch"
 date: "`r Sys.Date()`"
 execute: 
@@ -24,7 +24,7 @@ bibliography: references.bib
 
 Tea (*Camellia sinensis* (L.) Kuntze) is a major cash crop and key driver of livelihoods in many parts of central highlands of Kenya with favorable altitude, rainfall, and soil conditions. Accurate monitoring of tea plantations is important for supporting agricultural planning, optimizing resource allocation like fertilizer, and monitoring land use change such as encroachment into protected areas. Traditional field surveys, though accurate, are often time-consuming and resource intensive, making remote sensing approaches increasingly valuable.
 
-In this tutorial, we demonstrate how to map tea plantations in a small region at the foot of Mount Kenya by combining Sentinel-2 satellite imagery, true presence and absence field data, and random forest machine learning techniques implemented in **R** [@rcoreteam2023]. We focus on workflow that spans from data preparation and model training to prediction and visualization of binary maps.
+In this tutorial, we demonstrate how to map tea plantations in a small region at the foot of Mount Kenya by combining Sentinel-2 satellite imagery, true presence and absence field data, and random forest machine learning techniques implemented in **R** [@rcoreteam2025]. We focus on workflow that spans from data preparation and model training to prediction and visualization of binary maps.
 
 ::: callout-note
 While the case study is centered on tea mapping, the general approach can be adapted to map other crops or land cover types in different regions.
@@ -57,8 +57,8 @@ We begin by loading the boundary data using the `vect` function in `terra` packa
 #| fig-cap: "Study area extent"
 #| message: false
 
-library(terra)      # version 1.8.54
-library(tidyterra)  # version 0.7.2
+library(terra)      # version 1.9.27
+library(tidyterra)  # version 1.1.0
 library(tidyverse)  # version 2.0.0
 
 study_area <- vect(x = "data/roi_p.gpkg")
@@ -102,7 +102,7 @@ ggplot() +
   theme_minimal()
 ```
 
-It is then time to obtain the training data from the satellite image. We will use the `extract` function from `terra` package to extract the values of the pixels in the polygons.
+We can then obtain the training data from the satellite image. We will use the `extract` function from `terra` package to extract the values of the pixels in the polygons.
 
 ```{r}
 #| message: false
@@ -125,7 +125,7 @@ plot(study_area, add = T, lwd = 4, border = 'red')
 plot(roi, add = T, fill = FALSE, border = 'blue', lwd = 2)
 ```
 
-Since we know the that polygons 1 to 28 are tea plantations and 29th is non-tea field, we can subset the data to have tea and non-tea extracted values.
+Since we know that the polygons 1 to 28 are tea plantations and 29th is non-tea field, we can subset the data to have tea and non-tea extracted values.
 
 ```{r}
 tea_df <- tea_extract[tea_extract$ID != 29, ]
@@ -169,12 +169,12 @@ Then the model calibration stage comes with sdm function from `sdm` package itse
 tea_model <- sdm(formula = tea ~.,
                  data = sdm_data, 
                  methods = "rf",
-                 replications = "boot",
+                 replications = "sub", # can use boot or cv too
                  test.p = 30,
                  n = 5,
                  parallelSettings = list(ncores = 10,
                                          method = "parallel"))
-write.sdm(tea_model, "model/tea_model.sdm")
+# write.sdm(tea_model, "model/tea_model.sdm")
 ```
 
 View the model summary:
@@ -341,12 +341,9 @@ library(mapview)
 test_data <- vect("data/eval.gpkg")
 
 e1 <- extract(pred_median, test_data)
-e2 <- extract(tea_no_tea_map, test_data)
 
 eval1 <- evaluates(x = test_data$tea_no_tea,
                    p = e1$median)
-eval2 <- evaluates(x = test_data$tea_no_tea,
-                   p = e2$median)
 
 eval1@threshold_based
 eval1@statistics
@@ -418,13 +415,13 @@ df_area |>
 
 Manual monitoring of tea plantations is costly and limited in scale. Using machine learning models and high resolution satellite images, we can automate and enhance the monitoring process, with applications including:
 
--   **Pest and disease detection**: Early identification for timely detection.
--   **Drought monitoring**: Could help detect water stress for irrigation planning.
--   **Yield estimation**: Predicting yield based on spectral data and plant health.
--   **Damage assessment**: Identifying hail and other weather related impacts.
--   **Encroachment detection**: Monitoring illegal expansion of plantations into protected areas.
--   **Carbon quantification**: This can make it possible to efficiently quantify carbon in tea plantations.
--   **Tacking tea shift**: Monitoring shifts in tea cultivation due to climate change and other reasons over time.
+- **Pest and disease detection**: Early identification for timely detection.
+- **Drought monitoring**: Could help detect water stress for irrigation planning.
+- **Yield estimation**: Predicting yield based on spectral data and plant health.
+- **Damage assessment**: Identifying hail and other weather related impacts.
+- **Encroachment detection**: Monitoring illegal expansion of plantations into protected areas.
+- **Carbon quantification**: This can make it possible to efficiently quantify carbon in tea plantations.
+- **Tacking tea shift**: Monitoring shifts in tea cultivation due to climate change and other reasons over time.
 
 ## **Conclusion: Key Observations from the workflow**
 
